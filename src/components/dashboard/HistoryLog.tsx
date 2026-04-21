@@ -57,13 +57,13 @@ export default function HistoryLog({ donations, onUpdate }: Props) {
               </tr>
             )}
             {donations.map(d => (
-              <tr key={d.id} className="bg-neutral-950/50 border border-white/5 rounded-2xl hover:bg-neutral-950 transition-all group">
+              <tr key={d.id} className="bg-white/5 dark:bg-neutral-950/50 border border-black/5 dark:border-white/5 rounded-2xl hover:bg-black/10 dark:hover:bg-neutral-950 transition-all group">
                 <td className="px-6 py-4 rounded-l-2xl">
                    <div className="flex items-center gap-3">
                       <div className="w-8 h-8 rounded-lg bg-orange-600/10 text-orange-500 flex items-center justify-center font-bold text-xs">
                         {d.donorName.charAt(0)}
                       </div>
-                      <span className="font-bold text-sm">{d.donorName}</span>
+                      <span className="font-bold text-sm text-black dark:text-white">{d.donorName}</span>
                    </div>
                 </td>
                 <td className="px-6 py-4">

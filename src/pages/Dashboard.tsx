@@ -696,25 +696,27 @@ export default function Dashboard() {
                    <p className="text-neutral-500">Manage all streamers and system-wide settings.</p>
                 </div>
                 
-                <div className="space-y-4">
+              <div className="space-y-4">
                   {allStreamers.map(s => (
-                    <div key={s.id} className="p-6 rounded-2xl glass-panel flex items-center justify-between">
+                    <div key={s.id} className="p-6 rounded-2xl glass-panel flex items-center justify-between hover:bg-black/5 dark:hover:bg-white/5 transition-colors">
                       <div className="flex items-center gap-4">
-                        <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center font-bold">
+                        <div className="w-10 h-10 rounded-full bg-black/5 dark:bg-white/10 flex items-center justify-center font-bold">
                           {s.username.charAt(0).toUpperCase()}
                         </div>
                         <div>
                           <p className="font-bold">{s.displayName} (@{s.username})</p>
-                          <p className="text-xs text-neutral-500">Role: {s.role}</p>
+                          <p className="text-xs text-neutral-500 dark:text-neutral-400">Role: {s.role}</p>
                         </div>
                       </div>
                       <div className="flex gap-2">
-                        <button className="px-4 py-2 bg-white/5 rounded-lg text-xs font-bold hover:bg-white/10 uppercase tracking-tighter">View Page</button>
+                        <button className="px-4 py-2 bg-black/5 dark:bg-white/5 rounded-lg text-xs font-bold hover:bg-black/10 dark:hover:bg-white/10 uppercase tracking-tighter">View Page</button>
                         <button 
                           onClick={() => handleToggleSubscription(s.id, s.subscriptionActive)}
                           className={cn(
-                            "px-4 py-2 rounded-lg text-xs font-bold transition-all uppercase tracking-tighter",
-                            s.subscriptionActive ? "bg-red-500/10 text-red-500 hover:bg-red-500/20" : "bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500/20"
+                            "px-4 py-2 rounded-lg text-xs font-bold transition-all uppercase tracking-tighter border",
+                            s.subscriptionActive 
+                              ? "bg-red-500/10 text-red-600 border-red-500/20 hover:bg-red-500/20" 
+                              : "bg-emerald-500/10 text-emerald-600 border-emerald-500/20 hover:bg-emerald-500/20"
                           )}
                         >
                           {s.subscriptionActive ? 'Suspend Account' : 'Reactivate'}
@@ -787,8 +789,10 @@ function TabButton({ active, onClick, icon, label }: any) {
       onClick={onClick}
       className={cn(
         "px-6 py-3 rounded-2xl text-sm font-bold flex items-center gap-2 transition-all active:scale-95 whitespace-nowrap",
-        "glass-panel hover:bg-white/5",
-        active ? "bg-white/10 text-white border-white/20" : "text-neutral-500 hover:text-neutral-100 border-transparent"
+        "glass-panel hover:bg-black/5 dark:hover:bg-white/5 border",
+        active 
+          ? "bg-black/10 dark:bg-white/10 text-black dark:text-white border-black/10 dark:border-white/20" 
+          : "text-neutral-600 dark:text-neutral-400 hover:text-black dark:hover:text-white border-transparent"
       )}
     >
       {icon}

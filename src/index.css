@@ -48,7 +48,7 @@ body {
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border: 1px solid var(--glass-border);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05); /* Reduced shadow intensity */
 }
 
 .glass-card-hover {
@@ -56,10 +56,10 @@ body {
 }
 
 .glass-card-hover:hover {
-  background: rgba(255, 255, 255, 0.03);
-  border-color: rgba(255, 255, 255, 0.1);
-  transform: translateY(-1px);
-  box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+  background: color-mix(in srgb, var(--glass-bg) 80%, black 10%); /* Dynamic hover background */
+  border-color: var(--glass-border);
+  transform: translateY(-2px);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
 }
 
 ::-webkit-scrollbar {
