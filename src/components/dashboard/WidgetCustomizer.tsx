@@ -5,6 +5,8 @@ import { Widget } from '../../types';
 import { widgetApi } from '../../lib/api';
 import { cn } from '../../lib/utils';
 import { toast } from 'sonner';
+import { GlassCard } from '../ui/GlassCard';
+import { GradientPicker } from '../ui/GradientPicker';
 
 interface Props {
   widget: Widget;
@@ -110,10 +112,7 @@ interface Props {
             </button>
           )}
         </div>
-        <div 
-          className="aspect-video w-full rounded-3xl border border-white/5 relative overflow-hidden flex items-center justify-center p-8 border-dashed border-2"
-          style={{ background: 'repeating-conic-gradient(#171717 0% 25%, #0a0a0a 0% 50%) 50% / 20px 20px' }}
-        >
+        <GlassCard className="aspect-video w-full relative overflow-hidden flex items-center justify-center p-8 border-dashed border-2">
           {widget.type === 'alert' && (
             <AnimatePresence>
               {testAlert && (
@@ -122,6 +121,11 @@ interface Props {
                    animate={{ y: 0, opacity: 1, scale: 1 }} 
                    exit={{ opacity: 0, scale: 0.8 }}
                    className="bg-black/90 p-6 rounded-3xl border border-white/10 text-center shadow-2xl relative z-10"
+                   style={{ 
+                     padding: `${config.alertPadding || 16}px`,
+                     fontSize: `${config.alertFontSize || 16}px`,
+                     borderRadius: `${config.alertBorderRadius || 24}px`
+                   }}
                 >
                   <div className="w-12 h-12 rounded-xl mx-auto mb-4 animate-bounce" style={{ backgroundColor: config.primaryColor }} />
                   <p className="font-black text-white uppercase italic text-lg tracking-tighter pr-1">DONOR Name Sent ₹50</p>
@@ -191,7 +195,7 @@ interface Props {
               </div>
             </div>
           )}
-        </div>
+        </GlassCard>
         {widget.type === 'alert' && (
           <p className="text-[10px] text-neutral-500 italic text-center">Tip: Click "Test Alert" to simulate a real contribution.</p>
         )}
@@ -232,105 +236,33 @@ interface Props {
             </div>
          </div>
 
-         <div className="space-y-4 pt-4 border-t border-white/5">
-            <div className="flex items-center justify-between p-4 bg-white/5 rounded-2xl border border-white/5">
-               <div>
-                 <p className="text-sm font-bold">TTS Enabled</p>
-                 <p className="text-[10px] text-neutral-500">Read donor messages using AI</p>
-               </div>
-               <button 
-                 onClick={() => setConfig({ ...config, ttsEnabled: !config.ttsEnabled })}
-                 className={cn(
-                   "w-12 h-6 rounded-full transition-colors relative",
-                   config.ttsEnabled ? "bg-orange-600" : "bg-neutral-800"
-                 )}
-               >
-                 <div className={cn(
-                   "absolute top-1 w-4 h-4 bg-white rounded-full transition-all",
-                   config.ttsEnabled ? "right-1" : "left-1"
-                 )} />
-               </button>
+          {widget.type === 'alert' && (
+            <div className="pt-4 border-t border-white/5 space-y-4">
+              <label className="text-xs font-bold uppercase text-neutral-500">Alert Settings</label>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-1">
+                  <label className="text-[10px] font-bold text-neutral-500">Padding</label>
+                  <input type="number" value={config.alertPadding || 16} onChange={(e) => setConfig({...config, alertPadding: parseInt(e.target.value)})} className="w-full bg-neutral-900 border border-white/5 rounded-xl p-2 text-sm" />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-[10px] font-bold text-neutral-500">Font Size (px)</label>
+                  <input type="number" value={config.alertFontSize || 16} onChange={(e) => setConfig({...config, alertFontSize: parseInt(e.target.value)})} className="w-full bg-neutral-900 border border-white/5 rounded-xl p-2 text-sm" />
+                </div>
+              </div>
             </div>
+          )}
 
-            {config.ttsEnabled && (
-               <motion.div 
-                 initial={{ opacity: 0, height: 0 }}
-                 animate={{ opacity: 1, height: 'auto' }}
-                 className="space-y-2"
-               >
-                  <label className="text-xs font-bold uppercase text-neutral-500 flex items-center gap-2">
-                    <Mic size={12} /> AI Voice Selection
-                  </label>
-                  <div className="flex gap-2">
-                    <select 
-                      value={config.ttsVoice || 'Zephyr'}
-                      onChange={(e) => setConfig({ ...config, ttsVoice: e.target.value })}
-                      className="grow bg-neutral-950 border border-white/10 rounded-xl p-3 outline-none text-sm font-bold appearance-none bg-[url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23666%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%3E%3C/polyline%3E%3C/svg%3E')] bg-[length:20px] bg-[right_12px_center] bg-no-repeat"
-                    >
-                      <option value="Zephyr">Deep/Male (System)</option>
-                      <option value="Kore">Natural/Female (System)</option>
-                      <option value="Puck">Playful/High (System)</option>
-                      <option value="Charon">Slow/Serious (System)</option>
-                      <option value="Standard">Default OS Voice</option>
-                    </select>
-                    <button 
-                      onClick={handlePreviewVoice}
-                      disabled={previewingVoice}
-                      className="p-3 bg-white/5 rounded-xl border border-white/5 hover:bg-white/10 transition-all text-orange-500 disabled:opacity-50"
-                      title="Play Preview"
-                    >
-                      {previewingVoice ? <div className="w-5 h-5 border-2 border-orange-500 border-t-transparent rounded-full animate-spin" /> : <Volume2 size={20} />}
-                    </button>
-                  </div>
-                  
-                  <div className="grid grid-cols-2 gap-4 pt-2">
-                    <div className="space-y-1">
-                      <div className="flex justify-between">
-                        <label className="text-[10px] font-bold uppercase text-neutral-500">Pitch</label>
-                        <span className="text-[10px] font-mono text-orange-500">{config.ttsPitch || 1.0}</span>
-                      </div>
-                      <input 
-                        type="range" min="0.5" max="2.0" step="0.1"
-                        value={config.ttsPitch || 1.0}
-                        onChange={(e) => setConfig({ ...config, ttsPitch: parseFloat(e.target.value) })}
-                        className="w-full accent-orange-500 h-1 bg-neutral-800 rounded-lg appearance-none cursor-pointer"
-                      />
-                    </div>
-                    <div className="space-y-1">
-                      <div className="flex justify-between">
-                        <label className="text-[10px] font-bold uppercase text-neutral-500">Volume</label>
-                        <span className="text-[10px] font-mono text-orange-500">{Math.round((config.ttsVolume || 1.0) * 100)}%</span>
-                      </div>
-                      <input 
-                        type="range" min="0.1" max="1.0" step="0.1"
-                        value={config.ttsVolume || 1.0}
-                        onChange={(e) => setConfig({ ...config, ttsVolume: parseFloat(e.target.value) })}
-                        className="w-full accent-orange-500 h-1 bg-neutral-800 rounded-lg appearance-none cursor-pointer"
-                      />
-                    </div>
-                  </div>
-               </motion.div>
-            )}
-         </div>
 
          {(widget.type === 'goal' || widget.type === 'ticker') && (
            <div className="space-y-4 pt-4 border-t border-white/5">
               <div className="grid grid-cols-2 gap-4">
                  <div className="space-y-2">
-                   <label className="text-xs font-bold uppercase text-neutral-500">Box Background</label>
-                   <div className="relative">
-                      <input 
-                        type="text" 
-                        placeholder="#000000 or linear-gradient(...)"
-                        value={config.boxGradient || config.backgroundColor || '#000000'}
-                        onChange={(e) => setConfig({ ...config, boxGradient: e.target.value, backgroundColor: e.target.value })}
-                        className="w-full bg-neutral-950 border border-white/10 rounded-xl p-3 outline-none text-xs font-mono"
-                      />
-                   </div>
-                   <div className="flex gap-2 mt-2">
-                     <button onClick={() => setConfig({...config, boxGradient: 'linear-gradient(135deg, rgba(0,0,0,0.8), rgba(20,20,0,0.9))', backgroundColor: ''})} className="text-[10px] bg-white/5 px-2 py-1 rounded hover:bg-white/10">Try Dark Glass</button>
-                     <button onClick={() => setConfig({...config, boxGradient: 'linear-gradient(to bottom, rgba(15,23,42,0.9), rgba(0,0,0,0.95))', backgroundColor: ''})} className="text-[10px] bg-white/5 px-2 py-1 rounded hover:bg-white/10">Try Midnight</button>
-                   </div>
+                    <label className="text-xs font-bold uppercase text-neutral-500">Box Background</label>
+                    <GradientPicker 
+                        value={config.boxGradient || '#000000'}
+                        onChange={(g) => setConfig({...config, boxGradient: g, backgroundColor: g})}
+                        label="Choose a Gradient"
+                    />
                  </div>
                  <div className="space-y-2">
                     <div className="flex justify-between">

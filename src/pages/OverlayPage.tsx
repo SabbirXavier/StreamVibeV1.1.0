@@ -227,7 +227,12 @@ export default function OverlayPage() {
             initial={{ opacity: 0, y: 50, scale: 0.8 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, scale: 0.5, transition: { duration: 0.3 } }}
-            className="flex flex-col items-center text-center p-8 rounded-[40px] bg-black/90 backdrop-blur-md border border-white/20 shadow-2xl max-w-2xl min-w-[400px]"
+            className="flex flex-col items-center text-center bg-black/90 backdrop-blur-md border border-white/20 shadow-2xl max-w-2xl min-w-[400px]"
+            style={{
+              padding: `${widget.config.alertPadding || 32}px`,
+              borderRadius: `${widget.config.alertBorderRadius || 40}px`,
+              fontSize: `${widget.config.alertFontSize || 16}px`
+            }}
           >
              <div 
               className="w-24 h-24 rounded-3xl flex items-center justify-center mb-6 shadow-lg"
@@ -236,13 +241,13 @@ export default function OverlayPage() {
                 <IndianRupee size={48} className="text-white" />
              </div>
              
-             <h1 className="text-4xl font-black text-white mb-2 uppercase tracking-tight italic">
+             <h1 style={{ fontSize: 'inherit' }} className="font-black text-white mb-2 uppercase tracking-tight italic">
                {currentAlert.donorName} SENT {currentAlert.currency || '₹'}{currentAlert.amount}
              </h1>
              
              <div className="h-1 w-24 bg-white/20 rounded-full mb-6" />
              
-             <p className="text-2xl font-bold text-orange-400 leading-relaxed max-w-md italic">
+             <p className="font-bold text-orange-400 leading-relaxed max-w-md italic" style={{ fontSize: '1.2em' }}>
                "{currentAlert.message}"
              </p>
 

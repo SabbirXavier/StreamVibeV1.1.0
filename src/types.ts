@@ -92,6 +92,10 @@ export interface WidgetConfig {
   backgroundColor?: string;
   backgroundOpacity?: number;
   isPaused?: boolean;
+  alertPadding?: number; // e.g. 16
+  alertFontSize?: number; // e.g. 16
+  alertFontFamily?: string;
+  alertBorderRadius?: number;
 }
 
 export interface Widget {

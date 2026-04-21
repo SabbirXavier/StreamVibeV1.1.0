@@ -690,17 +690,17 @@ export default function Dashboard() {
 
         {activeTab === 'admin' && streamer.role === 'admin' && (
           <motion.div key="admin" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}>
-             <div className="bg-neutral-900/50 border border-white/10 rounded-[2.5rem] p-10 backdrop-blur-sm shadow-xl">
+             <div className="glass-panel rounded-[2.5rem] p-10">
                 <div className="mb-10">
-                   <h2 className="text-3xl font-bold mb-2 tracking-tight">Platform Admin</h2>
+                   <h2 className="text-3xl font-black mb-1 tracking-tight">Platform Admin</h2>
                    <p className="text-neutral-500">Manage all streamers and system-wide settings.</p>
                 </div>
                 
                 <div className="space-y-4">
                   {allStreamers.map(s => (
-                    <div key={s.id} className="p-6 rounded-2xl bg-neutral-950 border border-white/5 flex items-center justify-between">
+                    <div key={s.id} className="p-6 rounded-2xl glass-panel flex items-center justify-between">
                       <div className="flex items-center gap-4">
-                        <div className="w-10 h-10 rounded-full bg-neutral-800 flex items-center justify-center font-bold">
+                        <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center font-bold">
                           {s.username.charAt(0).toUpperCase()}
                         </div>
                         <div>
@@ -729,9 +729,9 @@ export default function Dashboard() {
 
         {activeTab === 'branding' && (
           <motion.div key="branding" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}>
-             <div className="bg-neutral-900/50 border border-white/10 rounded-[2.5rem] p-10 backdrop-blur-sm shadow-xl">
+             <div className="glass-panel rounded-[2.5rem] p-10">
                 <div className="mb-10 text-center md:text-left">
-                   <h2 className="text-3xl font-bold mb-2 tracking-tight">Profile & Branding</h2>
+                   <h2 className="text-3xl font-black mb-2 tracking-tight">Profile & Branding</h2>
                    <p className="text-neutral-500 max-w-xl">Customize your tipping page to match your stream aesthetic.</p>
                 </div>
                 <BrandingManager streamer={streamer} />
@@ -741,9 +741,9 @@ export default function Dashboard() {
 
         {activeTab === 'platform' && streamer.role === 'admin' && systemSettings && (
           <motion.div key="platform" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}>
-             <div className="bg-neutral-900/50 border border-white/10 rounded-[2.5rem] p-10 backdrop-blur-sm shadow-xl">
+             <div className="glass-panel rounded-[2.5rem] p-10">
                 <div className="mb-10 text-center md:text-left">
-                   <h2 className="text-3xl font-bold mb-2 tracking-tight">Platform Configuration</h2>
+                   <h2 className="text-3xl font-black mb-2 tracking-tight">Platform Configuration</h2>
                    <p className="text-neutral-500">Manage global branding, administrators, and system-wide settings.</p>
                 </div>
                 <PlatformSettingsComponent settings={systemSettings} />
@@ -786,8 +786,9 @@ function TabButton({ active, onClick, icon, label }: any) {
     <button 
       onClick={onClick}
       className={cn(
-        "px-6 py-3 rounded-xl text-sm font-bold flex items-center gap-2 transition-all active:scale-95 whitespace-nowrap",
-        active ? "bg-orange-600 text-white shadow-lg shadow-orange-600/20" : "text-neutral-500 hover:text-neutral-100 hover:bg-white/5"
+        "px-6 py-3 rounded-2xl text-sm font-bold flex items-center gap-2 transition-all active:scale-95 whitespace-nowrap",
+        "glass-panel hover:bg-white/5",
+        active ? "bg-white/10 text-white border-white/20" : "text-neutral-500 hover:text-neutral-100 border-transparent"
       )}
     >
       {icon}
@@ -798,17 +799,17 @@ function TabButton({ active, onClick, icon, label }: any) {
 
 function StatCard({ title, value, icon, badge, change }: any) {
   return (
-    <div className="bg-neutral-900/50 border border-white/10 rounded-[2rem] p-8 relative overflow-hidden group backdrop-blur-sm shadow-xl">
-      {badge && <span className="absolute top-4 right-4 bg-orange-600 text-white text-[10px] font-bold px-2 py-0.5 rounded italic shadow-lg shadow-orange-600/20">{badge}</span>}
-      <div className="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+    <div className="glass-panel glass-card-hover rounded-[2rem] p-8 relative overflow-hidden group">
+      {badge && <span className="absolute top-4 right-4 bg-orange-600/90 text-white text-[10px] font-bold px-2 py-0.5 rounded italic shadow-lg">{badge}</span>}
+      <div className="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center mb-6">
         {icon}
       </div>
       <div>
         <div className="flex items-center justify-between mb-1">
           <p className="text-neutral-500 text-xs font-bold uppercase tracking-widest">{title}</p>
-          {change && <span className="text-[10px] font-bold text-green-500">{change}</span>}
+          {change && <span className="text-[10px] font-bold text-emerald-400">{change}</span>}
         </div>
-        <p className="text-3xl font-bold tracking-tighter">{value}</p>
+        <p className="text-3xl font-black tracking-tight">{value}</p>
       </div>
     </div>
   );
