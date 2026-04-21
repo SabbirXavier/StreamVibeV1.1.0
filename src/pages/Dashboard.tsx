@@ -524,35 +524,35 @@ export default function Dashboard() {
               <StatCard 
                 title="Revenue" 
                 value={`${currencyMap[streamer.preferredCurrency] || '₹'}${totalEarningsDisplay.toLocaleString('en-IN')}`} 
-                icon={<Activity className="text-green-500" />} 
+                icon={<Activity className="text-emerald-400" />} 
                 badge="LIFETIME"
               />
               <StatCard 
                 title="Total Tips" 
                 value={totalTipsCount.toString()} 
-                icon={<Users className="text-blue-500" />} 
+                icon={<Users className="text-blue-400" />} 
               />
-              <StatCard title="Global Reach" value="International" badge="GLOBAL" icon={<Globe className="text-blue-400" />} />
+              <StatCard title="Global Reach" value="International" badge="GLOBAL" icon={<Globe className="text-purple-400" />} />
               <StatCard 
                 title="Active Plan" 
                 value={availablePlans.find(p => p.id === streamer.planId)?.name || 'Default Tier'} 
                 badge={streamer.isTrial ? "TRIAL" : "ACTIVE"} 
-                icon={<Zap className={cn(streamer.isTrial ? "text-orange-400" : "text-orange-500")} />} 
+                icon={<Zap className={cn(streamer.isTrial ? "text-amber-400" : "text-amber-500")} />} 
                 change={streamer.isTrial ? `${Math.ceil((new Date(streamer.trialEndsAt).getTime() - Date.now()) / (1000 * 60 * 60 * 24))} days left` : undefined}
               />
             </div>
 
-            <div className="bg-neutral-900/50 border border-white/10 rounded-[2.5rem] p-8 backdrop-blur-sm">
-              <h2 className="text-xl font-bold mb-8 flex items-center justify-between">
+            <div className="glass-panel p-8 rounded-[2.5rem]">
+              <h2 className="text-xl font-black mb-8 flex items-center justify-between tracking-tight">
                 Recent Contributions
-                <button className="text-sm font-medium text-orange-500 hover:underline px-4 py-2 hover:bg-orange-500/10 rounded-xl transition-colors">View All</button>
+                <button className="text-sm font-bold text-orange-500 hover:underline px-4 py-2 hover:bg-orange-500/10 rounded-xl transition-colors">View All</button>
               </h2>
               <div className="space-y-4">
                 {donations.length === 0 && <div className="text-center py-20 text-neutral-600 italic">No donations received at this moment.</div>}
                 {Array.isArray(donations) && donations.map(donation => (
-                  <div key={donation.id} className="flex items-center justify-between p-5 rounded-2xl bg-neutral-950/50 border border-white/5 hover:border-white/10 transition-all hover:bg-neutral-950">
+                  <div key={donation.id} className="flex items-center justify-between p-5 rounded-2xl bg-white/5 border border-white/5 hover:border-white/10 transition-all hover:bg-white/10">
                     <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 rounded-xl bg-orange-600/10 text-orange-500 flex items-center justify-center font-bold text-xl uppercase italic border border-orange-500/20">
+                      <div className="w-12 h-12 rounded-xl bg-orange-600/20 text-orange-500 flex items-center justify-center font-bold text-xl uppercase italic border border-orange-500/20">
                         {donation.donorName.charAt(0)}
                       </div>
                       <div>
@@ -563,8 +563,8 @@ export default function Dashboard() {
                       </div>
                     </div>
                     <div className="text-right">
-                      <p className="font-bold text-xl">{donation.currency || '$'} {donation.amount}</p>
-                      <p className="text-[10px] text-neutral-600 uppercase font-bold tracking-widest mt-1">
+                      <p className="font-black text-xl tracking-tight">{donation.currency || '$'} {donation.amount}</p>
+                      <p className="text-[10px] text-neutral-500 uppercase font-black tracking-widest mt-1">
                         {new Date(donation.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                       </p>
                     </div>

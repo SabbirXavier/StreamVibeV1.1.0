@@ -68,11 +68,11 @@ export default function Home() {
       
       {/* Pricing Mockup */}
       <section className="mt-32 px-4">
-        <div className="max-w-4xl mx-auto rounded-3xl border border-white/10 bg-neutral-900/50 p-12 text-center">
-          <h2 className="text-3xl font-bold mb-4">Simple Monthly Subscription</h2>
-          <p className="text-neutral-400 mb-8">One flat fee for all premium features. No hidden charges.</p>
-          <div className="text-6xl font-bold mb-8">₹499 <span className="text-xl text-neutral-500">/ month</span></div>
-          <button className="bg-white text-black px-12 py-4 rounded-2xl font-bold text-lg hover:bg-neutral-200 transition-colors">
+        <div className="max-w-4xl mx-auto glass-panel rounded-[2.5rem] p-12 text-center shadow-2xl">
+          <h2 className="text-3xl font-black mb-4 tracking-tight">Simple Monthly Subscription</h2>
+          <p className="text-neutral-500 mb-8 max-w-sm mx-auto">One flat fee for all premium features. No hidden charges.</p>
+          <div className="text-6xl font-black mb-10 tracking-tighter">₹499 <span className="text-xl text-neutral-500 font-bold">/ month</span></div>
+          <button className="bg-white text-black px-12 py-4 rounded-2xl font-bold text-lg hover:bg-neutral-200 transition-colors shadow-lg">
             Get Pro Badge
           </button>
         </div>
