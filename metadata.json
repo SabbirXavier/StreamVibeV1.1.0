@@ -1,0 +1,8 @@
+{
+  "name": "Remix: StreamVibe",
+  "description": "Premium creator toolkit for live streamers featuring 0% commission international tips, real-time OBS alerts, and AI-powered interaction.",
+  "requestFramePermissions": [
+    "microphone"
+  ],
+  "majorCapabilities": []
+}
