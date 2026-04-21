@@ -25,17 +25,20 @@ function ColorSystem({ config, onChange, label }: ColorSystemProps) {
   ];
 
   return (
-    <div className="space-y-4">
-      {label && <label className="text-xs font-black uppercase tracking-widest text-neutral-400">{label}</label>}
+    <div className="space-y-6">
+      {label && <label className="text-[10px] font-black uppercase tracking-widest text-neutral-500 dark:text-neutral-400">{label}</label>}
       
-      <div className="space-y-2">
-         <p className="text-[10px] font-bold uppercase text-neutral-600">Solid Colors</p>
+      <div className="space-y-3">
+         <p className="text-[10px] font-bold uppercase text-neutral-500 dark:text-neutral-600">Solid Colors</p>
          <div className="flex flex-wrap gap-2">
             {PRESET_SOLID_COLORS.map(color => (
                <button 
                   key={color}
                   onClick={() => onChange({...config, boxGradient: null, backgroundColor: color})}
-                  className={cn("w-8 h-8 rounded-full border-2", config.backgroundColor === color && !config.boxGradient ? "border-white" : "border-white/10")}
+                  className={cn(
+                    "w-9 h-9 rounded-full border-2 transition-transform hover:scale-110", 
+                    config.backgroundColor === color && !config.boxGradient ? "border-black dark:border-white ring-2 ring-black/20 dark:ring-white/20" : "border-black/10 dark:border-white/10"
+                  )}
                   style={{ backgroundColor: color }}
                />
             ))}
@@ -43,19 +46,22 @@ function ColorSystem({ config, onChange, label }: ColorSystemProps) {
                type="color"
                value={config.backgroundColor || '#000000'}
                onChange={(e) => onChange({...config, boxGradient: null, backgroundColor: e.target.value})}
-               className="w-8 h-8 rounded-full cursor-pointer bg-transparent border border-white/10"
+               className="w-9 h-9 rounded-full cursor-pointer bg-transparent border border-black/10 dark:border-white/10"
             />
          </div>
       </div>
 
-      <div className="space-y-2">
-         <p className="text-[10px] font-bold uppercase text-neutral-600">Gradients</p>
-         <div className="grid grid-cols-3 gap-2">
+      <div className="space-y-3">
+         <p className="text-[10px] font-bold uppercase text-neutral-500 dark:text-neutral-600">Gradients</p>
+         <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
             {PRESET_GRADIENTS.map((gradient, idx) => (
                <button
                   key={idx}
                   onClick={() => onChange({...config, boxGradient: gradient, backgroundColor: null})}
-                  className={cn("w-full h-10 rounded-xl border-2 transition-transform hover:scale-105", config.boxGradient === gradient ? "border-white" : "border-white/10")}
+                  className={cn(
+                    "w-full h-12 rounded-xl border-2 transition-all hover:scale-105", 
+                    config.boxGradient === gradient ? "border-black dark:border-white ring-2 ring-black/20 dark:ring-white/20" : "border-black/5 dark:border-white/5"
+                  )}
                   style={{ background: gradient }}
                />
             ))}
@@ -196,10 +202,10 @@ interface Props {
           {widget.type === 'goal' && (
             <div 
               className="w-full max-w-sm space-y-4 p-8 rounded-[2rem] border border-black/5 dark:border-white/10 shadow-2xl transition-all"
-              style={{
-                background: config.boxGradient || `rgba(0, 0, 0, ${(config.backgroundOpacity !== undefined ? config.backgroundOpacity : 80) / 100})`,
-                backgroundColor: config.boxGradient ? undefined : config.backgroundColor || '#000000',
-              }}
+              style={config.boxGradient 
+                ? { background: config.boxGradient } 
+                : { backgroundColor: config.backgroundColor || '#000000', opacity: (config.backgroundOpacity !== undefined ? config.backgroundOpacity : 80) / 100 }
+              }
             >
                <div className="flex justify-between text-xs font-black uppercase italic tracking-tight">
                  <span className="text-white">{config.goalTitle || 'New PC Goal'}</span>
@@ -234,10 +240,10 @@ interface Props {
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: -20 }}
                       className="w-full flex items-center justify-between p-4 rounded-3xl shadow-lg absolute border border-black/5 dark:border-white/10"
-                      style={{
-                        background: config.boxGradient || `rgba(0,0,0,${(config.backgroundOpacity !== undefined ? config.backgroundOpacity : 80) / 100})`,
-                        backgroundColor: config.boxGradient ? undefined : config.backgroundColor || '#000000',
-                      }}
+                      style={config.boxGradient 
+                        ? { background: config.boxGradient } 
+                        : { backgroundColor: config.backgroundColor || '#000000', opacity: (config.backgroundOpacity !== undefined ? config.backgroundOpacity : 80) / 100 }
+                      }
                     >
                       <div className="flex items-center gap-4">
                         <div className="w-10 h-10 rounded-full flex items-center justify-center font-black text-sm uppercase bg-black/20 dark:bg-white/10 border border-black/5 dark:border-white/10 text-black dark:text-white">

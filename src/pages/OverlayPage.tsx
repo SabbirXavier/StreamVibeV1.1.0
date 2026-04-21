@@ -268,11 +268,10 @@ export default function OverlayPage() {
       {widget.type === 'goal' && !widget.config.isPaused && (
         <div 
           className="absolute bottom-10 left-10 w-96 p-6 rounded-3xl shadow-2xl backdrop-blur-md"
-          style={{
-            background: widget.config.boxGradient || `rgba(0,0,0,${(widget.config.backgroundOpacity !== undefined ? widget.config.backgroundOpacity : 80) / 100})`,
-            backgroundColor: widget.config.boxGradient ? undefined : widget.config.backgroundColor || '#000000',
-            border: `1px solid ${widget.config.boxGradient ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.1)'}`
-          }}
+          style={widget.config.boxGradient 
+            ? { background: widget.config.boxGradient, border: '1px solid rgba(255,255,255,0.05)' } 
+            : { backgroundColor: widget.config.backgroundColor || '#000000', opacity: (widget.config.backgroundOpacity !== undefined ? widget.config.backgroundOpacity : 80) / 100, border: '1px solid rgba(255,255,255,0.1)' }
+          }
         >
           <div className="flex justify-between text-xs font-black uppercase tracking-widest mb-3 italic">
             <span className="text-white">{widget.config.goalTitle || 'DONATION GOAL'}</span>
@@ -312,11 +311,10 @@ export default function OverlayPage() {
                      exit={{ opacity: 0, x: 50 }}
                      transition={{ duration: 0.5, type: 'spring' }}
                      className="w-full flex items-center justify-between p-3 rounded-2xl shadow-lg absolute backdrop-blur-md"
-                     style={{
-                       background: widget.config.boxGradient || `rgba(0,0,0,${(widget.config.backgroundOpacity !== undefined ? widget.config.backgroundOpacity : 80) / 100})`,
-                       backgroundColor: widget.config.boxGradient ? undefined : widget.config.backgroundColor || '#000000',
-                       border: `1px solid ${widget.config.boxGradient ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.1)'}`
-                     }}
+                     style={widget.config.boxGradient 
+                       ? { background: widget.config.boxGradient, border: '1px solid rgba(255,255,255,0.05)' } 
+                       : { backgroundColor: widget.config.backgroundColor || '#000000', opacity: (widget.config.backgroundOpacity !== undefined ? widget.config.backgroundOpacity : 80) / 100, border: '1px solid rgba(255,255,255,0.1)' }
+                     }
                    >
                      <div className="flex items-center gap-3">
                        <div className="w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs shadow-inner uppercase bg-black/50 border border-white/10 text-white">

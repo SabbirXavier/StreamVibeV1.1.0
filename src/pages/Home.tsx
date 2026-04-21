@@ -3,6 +3,7 @@ import { motion } from 'motion/react';
 import { Zap, ShieldCheck, Cpu, Volume2, Globe, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { adminApi } from '../lib/api';
+import { SubscriptionCard } from '../components/SubscriptionCard';
 
 export default function Home() {
   const [platformName, setPlatformName] = useState('StreamVibe');
@@ -66,15 +67,24 @@ export default function Home() {
         </div>
       </section>
       
-      {/* Pricing Mockup */}
+      {/* Subscriptions */}
       <section className="mt-32 px-4">
-        <div className="max-w-4xl mx-auto glass-panel rounded-[2.5rem] p-12 text-center shadow-2xl">
-          <h2 className="text-3xl font-black mb-4 tracking-tight">Simple Monthly Subscription</h2>
-          <p className="text-neutral-500 mb-8 max-w-sm mx-auto">One flat fee for all premium features. No hidden charges.</p>
-          <div className="text-6xl font-black mb-10 tracking-tighter">₹499 <span className="text-xl text-neutral-500 font-bold">/ month</span></div>
-          <button className="bg-white text-black px-12 py-4 rounded-2xl font-bold text-lg hover:bg-neutral-200 transition-colors shadow-lg">
-            Get Pro Badge
-          </button>
+        <div className="max-w-7xl mx-auto flex flex-wrap justify-center gap-8">
+            <SubscriptionCard 
+                title="Basic" 
+                price="INR 100" 
+                features={["Real-time Alerts", "Standard TTS", "5 Widgets"]} 
+            />
+            <SubscriptionCard 
+                title="Pro" 
+                price="INR 200" 
+                features={["Everything in Basic", "Advanced Analytics", "Custom Branding", "15 Widgets"]} 
+            />
+            <SubscriptionCard 
+                title="Elite" 
+                price="INR 300" 
+                features={["Everything in Pro", "Priority Support", "Unlimited Widgets", "API Access"]} 
+            />
         </div>
       </section>
     </main>

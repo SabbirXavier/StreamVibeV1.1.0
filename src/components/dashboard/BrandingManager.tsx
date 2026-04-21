@@ -61,25 +61,25 @@ export default function BrandingManager({ streamer }: { streamer: Streamer }) {
       {/* Settings Form */}
       <div className="space-y-6">
         <div className="glass-panel p-6">
-          <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
-            <User size={24} className="text-[var(--accent)]" /> Your Public Page
+          <h3 className="text-xl font-bold mb-4 flex items-center gap-2 text-neutral-900 dark:text-white">
+            <User size={24} className="text-orange-600" /> Your Public Page
           </h3>
-          <p className="text-sm text-[var(--text-secondary)] mb-4 leading-relaxed">
+          <p className="text-sm text-neutral-600 dark:text-neutral-400 mb-4 leading-relaxed">
             This is the link you share with viewers so they can tip you.
           </p>
-          <div className="flex bg-[var(--bg-secondary)] border border-[var(--glass-border)] rounded-xl overflow-hidden focus-within:border-[var(--accent)] transition-colors">
-            <div className="px-4 py-3 bg-[var(--bg-primary)] border-r border-[var(--glass-border)] text-[var(--text-secondary)] select-none">
+          <div className="flex bg-neutral-100 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-xl overflow-hidden focus-within:border-orange-500 transition-colors">
+            <div className="px-4 py-3 bg-neutral-200 dark:bg-neutral-950 border-r border-neutral-200 dark:border-neutral-800 text-neutral-500 select-none">
               {window.location.origin}/t/
             </div>
             <input 
               type="text" 
               readOnly 
               value={streamer.username} 
-              className="px-4 py-3 bg-transparent text-[var(--text-primary)] w-full outline-none font-bold"
+              className="px-4 py-3 bg-transparent text-neutral-900 dark:text-white w-full outline-none font-bold"
             />
             <button 
               onClick={handleCopy}
-              className="px-6 bg-[var(--accent)] text-white hover:bg-opacity-90 transition-colors font-bold uppercase tracking-wide text-sm flex items-center gap-2"
+              className="px-6 bg-orange-600 text-white hover:bg-orange-700 transition-colors font-bold uppercase tracking-wide text-sm flex items-center gap-2"
             >
               {copiedUrl ? <><CheckCircle size={16} /> Copied</> : <><Copy size={16} /> Copy</>}
             </button>
@@ -87,23 +87,23 @@ export default function BrandingManager({ streamer }: { streamer: Streamer }) {
         </div>
 
         <div className="glass-panel p-6 space-y-6">
-          <h3 className="text-xl font-bold flex items-center gap-2 border-b border-[var(--glass-border)] pb-4">
-            <Palette size={24} className="text-[var(--accent)]" /> Branding
+          <h3 className="text-xl font-bold flex items-center gap-2 border-b border-neutral-200 dark:border-neutral-800 pb-4 text-neutral-900 dark:text-white">
+            <Palette size={24} className="text-orange-600" /> Branding
           </h3>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-2">
-              <label className="text-xs font-bold uppercase text-[var(--text-secondary)]">Display Name</label>
+              <label className="text-xs font-bold uppercase text-neutral-500 dark:text-neutral-400">Display Name</label>
               <input 
                 type="text" 
                 value={formData.displayName}
                 onChange={(e) => setFormData({...formData, displayName: e.target.value})}
-                className="w-full bg-[var(--bg-secondary)] border border-[var(--glass-border)] rounded-xl p-3 outline-none focus:border-[var(--accent)] transition-colors text-[var(--text-primary)]"
+                className="w-full bg-neutral-100 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-xl p-3 outline-none focus:border-orange-500 transition-colors text-neutral-900 dark:text-white"
                 placeholder="Awesome Streamer"
               />
             </div>
             <div className="space-y-2">
-              <label className="text-xs font-bold uppercase text-[var(--text-secondary)]">Accent Color</label>
+              <label className="text-xs font-bold uppercase text-neutral-500 dark:text-neutral-400">Accent Color</label>
               <div className="flex items-center gap-3">
                 <input 
                   type="color" 
@@ -111,49 +111,49 @@ export default function BrandingManager({ streamer }: { streamer: Streamer }) {
                   onChange={(e) => setFormData({...formData, accentColor: e.target.value})}
                   className="w-12 h-12 bg-transparent rounded-lg cursor-pointer border-0 p-0"
                 />
-                <span className="font-mono text-sm text-[var(--text-secondary)] uppercase">{formData.accentColor}</span>
+                <span className="font-mono text-sm text-neutral-500 dark:text-neutral-400 uppercase">{formData.accentColor}</span>
               </div>
             </div>
           </div>
-
+          {/* ... keeping the rest of the form with similar updates ... */}
           <div className="space-y-2">
-            <label className="text-xs font-bold uppercase text-[var(--text-secondary)]">Bio / Message</label>
+            <label className="text-xs font-bold uppercase text-neutral-500 dark:text-neutral-400">Bio / Message</label>
             <textarea 
               rows={3}
               value={formData.bio}
               onChange={(e) => setFormData({...formData, bio: e.target.value})}
-              className="w-full bg-[var(--bg-secondary)] border border-[var(--glass-border)] rounded-xl p-4 outline-none focus:border-[var(--accent)] transition-colors resize-none text-[var(--text-primary)] leading-relaxed"
+              className="w-full bg-neutral-100 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-xl p-4 outline-none focus:border-orange-500 transition-colors resize-none text-neutral-900 dark:text-white leading-relaxed"
               placeholder="Thanks for supporting the stream!"
             />
           </div>
 
-          <div className="space-y-4 pt-4 border-t border-[var(--glass-border)]">
-             <div className="flex items-start gap-4 p-4 rounded-xl border border-[var(--accent)] border-opacity-20 bg-[var(--accent)] bg-opacity-5">
-                <ImageIcon className="text-[var(--accent)] shrink-0 mt-1" />
+          <div className="space-y-4 pt-4 border-t border-neutral-200 dark:border-neutral-800">
+             <div className="flex items-start gap-4 p-4 rounded-xl border border-orange-500 border-opacity-20 bg-orange-600 bg-opacity-5">
+                <ImageIcon className="text-orange-600 shrink-0 mt-1" />
                 <div>
-                   <p className="text-sm font-bold text-[var(--text-primary)] mb-1">Image URLs</p>
-                   <p className="text-xs text-[var(--text-secondary)] leading-relaxed">Paste direct links to images (imgur, discord, etc) ending in .png, .jpg, or .gif</p>
+                   <p className="text-sm font-bold text-neutral-900 dark:text-white mb-1">Image URLs</p>
+                   <p className="text-xs text-neutral-500 dark:text-neutral-400 leading-relaxed">Paste direct links to images (imgur, discord, etc) ending in .png, .jpg, or .gif</p>
                 </div>
              </div>
              
              <div className="space-y-2">
-                <label className="text-xs font-bold uppercase text-[var(--text-secondary)]">Profile Picture URL</label>
+                <label className="text-xs font-bold uppercase text-neutral-500 dark:text-neutral-400">Profile Picture URL</label>
                 <input 
                   type="text" 
                   value={formData.profileImage}
                   onChange={(e) => setFormData({...formData, profileImage: e.target.value})}
-                  className="w-full bg-[var(--bg-secondary)] border border-[var(--glass-border)] rounded-xl p-3 outline-none focus:border-[var(--accent)] transition-colors text-[var(--text-primary)]"
+                  className="w-full bg-neutral-100 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-xl p-3 outline-none focus:border-orange-500 transition-colors text-neutral-900 dark:text-white"
                   placeholder="https://example.com/profile.png"
                 />
              </div>
              
              <div className="space-y-2">
-                <label className="text-xs font-bold uppercase text-[var(--text-secondary)]">Cover Banner URL</label>
+                <label className="text-xs font-bold uppercase text-neutral-500 dark:text-neutral-400">Cover Banner URL</label>
                 <input 
                   type="text" 
                   value={formData.coverImage}
                   onChange={(e) => setFormData({...formData, coverImage: e.target.value})}
-                  className="w-full bg-[var(--bg-secondary)] border border-[var(--glass-border)] rounded-xl p-3 outline-none focus:border-[var(--accent)] transition-colors text-[var(--text-primary)]"
+                  className="w-full bg-neutral-100 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-xl p-3 outline-none focus:border-orange-500 transition-colors text-neutral-900 dark:text-white"
                   placeholder="https://example.com/banner.png"
                 />
              </div>
@@ -163,7 +163,7 @@ export default function BrandingManager({ streamer }: { streamer: Streamer }) {
                <select 
                  value={formData.preferredCurrency}
                  onChange={(e) => setFormData({ ...formData, preferredCurrency: e.target.value })}
-                 className="w-full bg-[var(--bg-secondary)] border border-[var(--glass-border)] rounded-xl p-3 outline-none focus:border-[var(--accent)] transition-colors text-[var(--text-primary)] appearance-none cursor-pointer"
+                 className="w-full bg-neutral-100 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-xl p-3 outline-none focus:border-orange-500 transition-colors text-neutral-900 dark:text-white appearance-none cursor-pointer"
                >
                  <option value="INR">INR (₹) - Best for India</option>
                  <option value="USD">USD ($) - Global</option>
@@ -176,7 +176,7 @@ export default function BrandingManager({ streamer }: { streamer: Streamer }) {
           <button 
             onClick={handleSave}
             disabled={saving}
-            className="w-full bg-[var(--accent)] text-white py-4 rounded-xl font-bold uppercase tracking-widest hover:bg-opacity-90 transition-all flex items-center justify-center gap-2"
+            className="w-full bg-orange-600 text-white py-4 rounded-xl font-bold uppercase tracking-widest hover:bg-orange-700 transition-all flex items-center justify-center gap-2"
           >
              {saving ? 'Saving...' : saved ? <><CheckCircle size={18} /> Profile Updated</> : <><Save size={18} /> Save Branding</>}
           </button>
@@ -195,13 +195,13 @@ export default function BrandingManager({ streamer }: { streamer: Streamer }) {
                 <button 
                   onClick={handleDeleteAccount}
                   disabled={deleting}
-                  className="flex-1 py-3 bg-red-600 hover:bg-red-500 text-white rounded-xl text-xs font-bold transition-all"
+                  className="flex-1 py-3 bg-red-600 hover:bg-red-700 text-white rounded-xl text-xs font-bold transition-all"
                 >
                   {deleting ? 'Deleting...' : 'Confirm Delete'}
                 </button>
                 <button 
                   onClick={() => setShowDeleteConfirm(false)}
-                  className="flex-1 py-3 bg-[var(--bg-secondary)] hover:bg-[var(--glass-border)] text-[var(--text-primary)] rounded-xl text-xs font-bold transition-all border border-[var(--glass-border)]"
+                  className="flex-1 py-3 bg-neutral-100 dark:bg-neutral-900 hover:bg-neutral-200 dark:hover:bg-neutral-800 text-neutral-900 dark:text-white rounded-xl text-xs font-bold transition-all border border-neutral-200 dark:border-neutral-800"
                 >
                   Cancel
                 </button>

@@ -10,6 +10,8 @@ import {
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { auth, googleProvider, RecaptchaVerifier, signInWithPhoneNumber } from '../lib/firebase';
+import { CyberToggle } from '../components/CyberToggle';
+import { FuturisticCard } from '../components/FuturisticCard';
 import { streamerApi, widgetApi, donationApi, adminApi, authApi } from '../lib/api';
 import { 
   signInWithPopup, 
@@ -490,7 +492,7 @@ export default function Dashboard() {
       </div>
 
       {/* Tab Navigation */}
-      <div className="flex flex-wrap items-center gap-1 bg-white/5 p-1.5 rounded-2xl w-fit mb-10 overflow-x-auto no-scrollbar border border-white/5">
+      <div className="flex flex-wrap items-center gap-1 bg-neutral-200 dark:bg-white/5 p-1.5 rounded-2xl w-fit mb-10 overflow-x-auto no-scrollbar border border-neutral-300 dark:border-white/5">
         <TabButton active={activeTab === 'overview'} onClick={() => setActiveTab('overview')} icon={<BarChart3 size={16} />} label="Overview" />
         <TabButton active={activeTab === 'widgets'} onClick={() => setActiveTab('widgets')} icon={<Layout size={16} />} label="Overlays" />
         <TabButton active={activeTab === 'branding'} onClick={() => setActiveTab('branding')} icon={<Palette size={16} />} label="Branding" />
@@ -542,15 +544,15 @@ export default function Dashboard() {
               />
             </div>
 
-            <div className="glass-panel p-8 rounded-[2.5rem]">
+            <FuturisticCard className="p-8">
               <h2 className="text-xl font-black mb-8 flex items-center justify-between tracking-tight">
                 Recent Contributions
                 <button className="text-sm font-bold text-orange-500 hover:underline px-4 py-2 hover:bg-orange-500/10 rounded-xl transition-colors">View All</button>
               </h2>
               <div className="space-y-4">
-                {donations.length === 0 && <div className="text-center py-20 text-neutral-600 italic">No donations received at this moment.</div>}
+                {donations.length === 0 && <div className="text-center py-20 text-neutral-600 dark:text-neutral-400 italic">No donations received at this moment.</div>}
                 {Array.isArray(donations) && donations.map(donation => (
-                  <div key={donation.id} className="flex items-center justify-between p-5 rounded-2xl bg-white/5 border border-white/5 hover:border-white/10 transition-all hover:bg-white/10">
+                  <div key={donation.id} className="flex items-center justify-between p-5 rounded-2xl bg-neutral-100 dark:bg-white/5 border border-neutral-200 dark:border-white/5 hover:border-neutral-300 dark:hover:border-white/10 transition-all hover:bg-neutral-200 dark:hover:bg-white/10">
                     <div className="flex items-center gap-4">
                       <div className="w-12 h-12 rounded-xl bg-orange-600/20 text-orange-500 flex items-center justify-center font-bold text-xl uppercase italic border border-orange-500/20">
                         {donation.donorName.charAt(0)}
@@ -571,13 +573,13 @@ export default function Dashboard() {
                   </div>
                 ))}
               </div>
-            </div>
+            </FuturisticCard>
           </motion.div>
         )}
 
         {activeTab === 'widgets' && (
           <motion.div key="widgets" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="space-y-8">
-             <div className="bg-orange-600/5 border border-orange-500/20 p-8 rounded-[2.5rem] flex flex-col md:flex-row items-center gap-8 shadow-xl">
+             <div className="bg-neutral-200/50 dark:bg-orange-600/[0.05] border border-neutral-300 dark:border-orange-500/20 p-8 rounded-[2.5rem] flex flex-col md:flex-row items-center gap-8 shadow-xl">
                <div className="w-20 h-20 bg-orange-600 rounded-3xl flex items-center justify-center shrink-0 border-4 border-orange-600/20 shadow-lg rotate-3">
                   <Play size={40} className="text-white ml-2" />
                </div>
@@ -669,7 +671,7 @@ export default function Dashboard() {
 
         {activeTab === 'payments' && (
           <motion.div key="payments" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}>
-             <div className="bg-neutral-900/50 border border-white/10 rounded-[2.5rem] p-10 backdrop-blur-sm shadow-xl">
+             <div className="bg-neutral-200/50 dark:bg-neutral-900/50 border border-neutral-300 dark:border-white/10 rounded-[2.5rem] p-10 backdrop-blur-sm shadow-xl">
                 <div className="mb-10 text-center md:text-left">
                    <h2 className="text-3xl font-bold mb-2 tracking-tight">Financial Hub</h2>
                    <p className="text-neutral-500 max-w-xl">Integration your specific payment gateways. Go international with Stripe or stay local with UPI Direct.</p>
@@ -708,19 +710,15 @@ export default function Dashboard() {
                           <p className="text-xs text-neutral-500 dark:text-neutral-400">Role: {s.role}</p>
                         </div>
                       </div>
-                      <div className="flex gap-2">
-                        <button className="px-4 py-2 bg-black/5 dark:bg-white/5 rounded-lg text-xs font-bold hover:bg-black/10 dark:hover:bg-white/10 uppercase tracking-tighter">View Page</button>
-                        <button 
-                          onClick={() => handleToggleSubscription(s.id, s.subscriptionActive)}
-                          className={cn(
-                            "px-4 py-2 rounded-lg text-xs font-bold transition-all uppercase tracking-tighter border",
-                            s.subscriptionActive 
-                              ? "bg-red-500/10 text-red-600 border-red-500/20 hover:bg-red-500/20" 
-                              : "bg-emerald-500/10 text-emerald-600 border-emerald-500/20 hover:bg-emerald-500/20"
-                          )}
-                        >
-                          {s.subscriptionActive ? 'Suspend Account' : 'Reactivate'}
-                        </button>
+                      <div className="flex gap-2 items-center">
+                        <button className="px-4 py-2 bg-neutral-200 dark:bg-white/5 rounded-lg text-xs font-bold hover:bg-neutral-300 dark:hover:bg-white/10 uppercase tracking-tighter">View Page</button>
+                        <div className="flex flex-col items-center">
+                          <CyberToggle 
+                            id={`toggle-${s.id}`} 
+                            checked={s.subscriptionActive} 
+                            onChange={() => handleToggleSubscription(s.id, s.subscriptionActive)} 
+                          />
+                        </div>
                       </div>
                     </div>
                   ))}
@@ -755,7 +753,7 @@ export default function Dashboard() {
 
         {activeTab === 'plans' && streamer.role === 'admin' && (
           <motion.div key="plans" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}>
-             <div className="bg-neutral-900/50 border border-white/10 rounded-[2.5rem] p-10 backdrop-blur-sm shadow-xl">
+             <div className="bg-neutral-200/50 dark:bg-neutral-900/50 border border-neutral-300 dark:border-white/10 rounded-[2.5rem] p-10 backdrop-blur-sm shadow-xl">
                 <div className="mb-10">
                    <h2 className="text-3xl font-bold mb-1 tracking-tight">Plan Monetization</h2>
                    <p className="text-neutral-500">Configure feature gates and pricing for different creator tiers.</p>
@@ -767,7 +765,7 @@ export default function Dashboard() {
 
         {activeTab === 'history' && (
           <motion.div key="history" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}>
-             <div className="bg-neutral-900/50 border border-white/10 rounded-[2.5rem] p-10 backdrop-blur-sm shadow-xl">
+             <div className="bg-neutral-200/50 dark:bg-neutral-900/50 border border-neutral-300 dark:border-white/10 rounded-[2.5rem] p-10 backdrop-blur-sm shadow-xl">
                 <div className="mb-10 flex items-center justify-between">
                    <div>
                      <h2 className="text-3xl font-bold mb-1 tracking-tight">Contribution Log</h2>
@@ -790,8 +788,8 @@ function TabButton({ active, onClick, icon, label }: any) {
       className={cn(
         "px-6 py-3 rounded-2xl text-sm font-bold flex items-center gap-2 transition-all active:scale-95 whitespace-nowrap border",
         active 
-          ? "bg-black text-white border-black dark:bg-white dark:text-black dark:border-white" 
-          : "bg-white/50 text-neutral-600 border-transparent hover:bg-neutral-200 dark:bg-neutral-800/50 dark:text-neutral-400 dark:hover:bg-neutral-800"
+          ? "bg-neutral-900 text-white border-neutral-900 dark:bg-white dark:text-black dark:border-white" 
+          : "bg-neutral-200/50 text-neutral-700 border-transparent hover:bg-neutral-300 dark:bg-neutral-800/50 dark:text-neutral-400 dark:hover:bg-neutral-800"
       )}
     >
       {icon}
