@@ -610,22 +610,22 @@ export default function Dashboard() {
              </div>
 
                   {widgets.map(w => (
-                    <div key={w.id} className="bg-neutral-900/50 border border-white/10 rounded-[2.5rem] p-8 backdrop-blur-sm shadow-xl">
+                    <div key={w.id} className="glass-panel p-8 rounded-[2.5rem]">
                        <div className="flex flex-col md:flex-row items-center justify-between mb-8 gap-4">
                          <h3 className="text-2xl font-black uppercase italic tracking-tighter flex items-center gap-3 pr-2">
                            <div className="w-2 h-8 bg-orange-600 rounded-full" />
                            {w.type} WIDGET
                          </h3>
-                         <div className="flex items-center gap-3 bg-neutral-950 px-4 py-3 rounded-2xl border border-white/5">
+                         <div className="flex items-center gap-3 bg-black/5 dark:bg-black/20 px-4 py-3 rounded-2xl border border-black/5 dark:border-white/5">
                             <span className="text-[11px] font-mono text-neutral-500 truncate max-w-[200px]">.../overlay/{w.id}</span>
                             <button 
                              onClick={() => { navigator.clipboard.writeText(`${window.location.origin}/overlay/${w.id}`); toast.success("Link copied to OBS source!"); }}
-                             className="p-2 rounded-lg bg-orange-600/10 text-orange-500 hover:bg-orange-600 hover:text-white transition-all active:scale-95 border border-orange-500/20"
+                             className="p-2 rounded-lg bg-orange-600/10 text-orange-600 dark:text-orange-500 hover:bg-orange-600 hover:text-white transition-all active:scale-95 border border-orange-500/20"
                              title="Copy Overlay URL"
                             >
                               <Copy size={16} />
                             </button>
-                            <Link to={`/overlay/${w.id}`} target="_blank" className="p-2 rounded-lg bg-white/5 text-neutral-400 hover:text-white hover:bg-white/10 transition-all border border-white/5">
+                            <Link to={`/overlay/${w.id}`} target="_blank" className="p-2 rounded-lg bg-black/5 dark:bg-white/5 text-neutral-500 dark:text-neutral-400 hover:text-black dark:hover:text-white hover:bg-black/10 dark:hover:bg-white/10 transition-all border border-black/5 dark:border-white/5">
                               <ExternalLink size={16} />
                             </Link>
                          </div>
@@ -635,7 +635,7 @@ export default function Dashboard() {
                   ))}
 
              {/* Real Test Trigger */}
-             <div className="bg-neutral-900/50 border border-white/10 rounded-[2.5rem] p-8 text-center space-y-6">
+             <div className="glass-panel p-8 rounded-[2.5rem] text-center space-y-6">
                 <div>
                    <h2 className="text-xl font-bold mb-2 tracking-tight">End-to-End Test</h2>
                    <p className="text-sm text-neutral-500 max-w-md mx-auto">Trigger a real database record to test your OBS Browser Source and AI Voice integration.</p>
@@ -788,11 +788,10 @@ function TabButton({ active, onClick, icon, label }: any) {
     <button 
       onClick={onClick}
       className={cn(
-        "px-6 py-3 rounded-2xl text-sm font-bold flex items-center gap-2 transition-all active:scale-95 whitespace-nowrap",
-        "glass-panel hover:bg-black/5 dark:hover:bg-white/5 border",
+        "px-6 py-3 rounded-2xl text-sm font-bold flex items-center gap-2 transition-all active:scale-95 whitespace-nowrap border",
         active 
-          ? "bg-black/10 dark:bg-white/10 text-black dark:text-white border-black/10 dark:border-white/20" 
-          : "text-neutral-600 dark:text-neutral-400 hover:text-black dark:hover:text-white border-transparent"
+          ? "bg-black text-white border-black dark:bg-white dark:text-black dark:border-white" 
+          : "bg-white/50 text-neutral-600 border-transparent hover:bg-neutral-200 dark:bg-neutral-800/50 dark:text-neutral-400 dark:hover:bg-neutral-800"
       )}
     >
       {icon}
