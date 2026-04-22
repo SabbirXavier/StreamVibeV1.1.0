@@ -41,7 +41,8 @@ export default function Dashboard() {
   const [donations, setDonations] = useState<Donation[]>([]);
   const [totalEarningStat, setTotalEarningStat] = useState(0);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<Tab>('overview');
+  const initialTab = (new URLSearchParams(window.location.search).get('tab') as Tab) || 'overview';
+  const [activeTab, setActiveTab] = useState<Tab>(initialTab);
   const [allStreamers, setAllStreamers] = useState<Streamer[]>([]);
   const [systemSettings, setSystemSettings] = useState<SystemSettings | null>(null);
   const [availablePlans, setAvailablePlans] = useState<SubscriptionPlan[]>([]);
@@ -258,7 +259,7 @@ export default function Dashboard() {
     }
   };
 
-  const handleAddWidget = async (type: 'alert' | 'goal' | 'ticker') => {
+  const handleAddWidget = async (type: 'alert' | 'goal' | 'ticker' | 'toptipper') => {
     // We keep the check for single alert box, since we fixed the delete button bug
     if (type === 'alert' && widgets.some(w => w.type === 'alert')) {
       toast.error(`You already have an active alert box.`);
@@ -268,9 +269,10 @@ export default function Dashboard() {
     try {
       await widgetApi.create({
         type,
-        config: type === 'ticker' ? { minAmount: 1, primaryColor: '#ef4444', tickerSpeed: 'normal', showText: true, tickerCount: 5, tickerInterval: 5 } : 
-               type === 'goal' ? { minAmount: 1, primaryColor: '#3b82f6', goalAmount: 5000, goalTitle: 'New Goal', goalStartingAmount: 0, goalStartDate: new Date().toISOString() } :
-               { minAmount: 1, ttsEnabled: true, primaryColor: '#ea580c', animationType: 'fade-up' }
+        config: type === 'ticker' ? { minAmount: 1, primaryColor: '#ef4444', tickerSpeed: 'normal', showText: true, tickerCount: 5, stickyText: '!protip', padding: 16 } : 
+               type === 'goal' ? { minAmount: 1, primaryColor: '#3b82f6', goalAmount: 5000, goalTitle: 'New Goal', goalStartingAmount: 0, padding: 16, progressBarHeight: 20 } :
+               type === 'toptipper' ? { minAmount: 1, primaryColor: '#eab308', padding: 16 } :
+               { minAmount: 1, ttsEnabled: true, primaryColor: '#ea580c', animationType: 'fade-up', padding: 16, ttsVoice: 'en-US' }
       });
       fetchDashboardData();
       toast.success(`${type.toUpperCase()} overlay added!`);
@@ -284,42 +286,42 @@ export default function Dashboard() {
     return (
       <main className="pt-24 px-4 text-center">
         <div id="recaptcha-container"></div>
-        <div className="max-w-md mx-auto p-8 md:p-12 rounded-[2.5rem] bg-neutral-900 border border-white/5 shadow-2xl relative overflow-hidden">
-          <div className="absolute top-0 left-0 w-full h-1 bg-orange-600" />
-          <div className="w-16 h-16 bg-orange-600/10 rounded-2xl flex items-center justify-center mx-auto mb-6 text-orange-500">
+        <div className="max-w-md mx-auto p-8 md:p-12 rounded-[2.5rem] bg-black/40 backdrop-blur-[20px] border border-white/10 shadow-[0_0_50px_rgba(0,0,0,0.5)] relative overflow-hidden">
+          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[#7C3AED] to-[#00FFFF]" />
+          <div className="w-16 h-16 bg-[#7C3AED]/20 rounded-2xl flex items-center justify-center mx-auto mb-6 text-[#00FFFF] shadow-[0_0_20px_rgba(124,58,237,0.3)]">
             <ShieldCheck size={32} />
           </div>
-          <h1 className="text-3xl font-bold tracking-tight mb-2">Creator Login</h1>
-          <p className="text-neutral-500 text-sm mb-8">Choose your preferred way to sign in</p>
+          <h1 className="text-3xl font-black text-chrome tracking-tight mb-2">Creator Login</h1>
+          <p className="text-zinc-400 text-sm mb-8 font-medium">Choose your preferred way to sign in</p>
 
           <AnimatePresence mode="wait">
             {authMode === 'options' && (
               <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="space-y-3">
                 <button 
                   onClick={handleGoogleSignIn}
-                  className="w-full bg-white text-black py-4 rounded-2xl font-bold hover:bg-neutral-200 transition-all flex items-center justify-center gap-3 active:scale-95 border border-white/10"
+                  className="w-full bg-white text-black py-4 rounded-2xl font-bold hover:brightness-90 transition-all flex items-center justify-center gap-3 active:scale-95 shadow-lg"
                 >
                   <img src="https://www.vectorlogo.zone/logos/google/google-icon.svg" className="w-5" alt="" />
                   Continue with Google
                 </button>
                 <button 
                   onClick={() => setAuthMode('email')}
-                  className="w-full bg-neutral-800 text-white py-4 rounded-2xl font-bold hover:bg-neutral-700 transition-all flex items-center justify-center gap-3 active:scale-95 border border-white/5"
+                  className="w-full bg-white/5 text-white py-4 rounded-2xl font-bold hover:bg-white/10 transition-all flex items-center justify-center gap-3 active:scale-95 border border-white/10 shadow-lg"
                 >
                   <Globe size={18} />
                   Email & Password
                 </button>
                 <button 
                   onClick={() => setAuthMode('phone')}
-                  className="w-full bg-neutral-800 text-white py-4 rounded-2xl font-bold hover:bg-neutral-700 transition-all flex items-center justify-center gap-3 active:scale-95 border border-white/5"
+                  className="w-full bg-white/5 text-white py-4 rounded-2xl font-bold hover:bg-white/10 transition-all flex items-center justify-center gap-3 active:scale-95 border border-white/10 shadow-lg"
                 >
                   <Users size={18} />
                   Phone Number
                 </button>
-                <div className="pt-4 border-t border-white/5">
+                <div className="pt-4 border-t border-white/10 mt-4">
                   <button 
                     onClick={handleTwitchSignIn}
-                    className="w-full bg-[#9146FF] text-white py-4 rounded-2xl font-bold hover:bg-[#a970ff] transition-all flex items-center justify-center gap-3 active:scale-95 shadow-xl"
+                    className="w-full bg-[#9146FF] text-white py-4 rounded-2xl font-bold hover:brightness-110 transition-all flex items-center justify-center gap-3 active:scale-95 shadow-xl"
                   >
                     <Play size={18} fill="currentColor" />
                     Sign in with Twitch
@@ -329,67 +331,119 @@ export default function Dashboard() {
             )}
 
             {authMode === 'email' && (
-              <motion.form initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} onSubmit={handleEmailAuth} className="space-y-4">
-                <input 
-                  type="email" 
-                  placeholder="Email Address" 
-                  value={email}
-                  onChange={e => setEmail(e.target.value)}
-                  className="w-full bg-neutral-950 border border-white/5 rounded-xl py-3 px-4 focus:border-orange-500 outline-none"
-                  required
-                />
-                <input 
-                  type="password" 
-                  placeholder="Password" 
-                  value={password}
-                  onChange={e => setPassword(e.target.value)}
-                  className="w-full bg-neutral-950 border border-white/5 rounded-xl py-3 px-4 focus:border-orange-500 outline-none"
-                  required
-                />
-                <button className="w-full bg-orange-600 text-white py-4 rounded-xl font-bold hover:bg-orange-500 transition-all">
-                  {isRegistering ? 'Create Account' : 'Sign In'}
-                </button>
-                <div className="flex justify-between items-center text-xs">
-                  <button type="button" onClick={() => setIsRegistering(!isRegistering)} className="text-orange-500 hover:underline">
-                    {isRegistering ? 'Have an account? Login' : 'New here? Register'}
-                  </button>
-                  <button type="button" onClick={() => setAuthMode('options')} className="text-neutral-500 hover:text-white">Go Back</button>
+              <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="space-y-6">
+                <div className="flex bg-black/40 p-1 rounded-xl border border-white/5">
+                  <button type="button" onClick={() => setIsRegistering(false)} className={`flex-1 py-2 text-sm font-bold rounded-lg transition-all ${!isRegistering ? 'bg-white/10 text-white shadow-md' : 'text-zinc-500 hover:text-zinc-300'}`}>Login</button>
+                  <button type="button" onClick={() => setIsRegistering(true)} className={`flex-1 py-2 text-sm font-bold rounded-lg transition-all ${isRegistering ? 'bg-white/10 text-white shadow-md' : 'text-zinc-500 hover:text-zinc-300'}`}>Register</button>
                 </div>
-              </motion.form>
+                
+                <form onSubmit={handleEmailAuth} className="space-y-4 text-left">
+                  {isRegistering && (
+                    <div className="space-y-4">
+                      <div>
+                        <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest ml-1 mb-1 block">Username</label>
+                        <div className="relative">
+                          <Users className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" size={16} />
+                          <input 
+                            type="text" 
+                            placeholder="kamalfps" 
+                            value={username}
+                            onChange={e => setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9]/g, ''))}
+                            className="w-full bg-black/40 border border-white/10 rounded-xl py-3 pl-10 pr-4 focus:border-[#00FFFF] outline-none text-white text-sm"
+                            required
+                          />
+                        </div>
+                      </div>
+                      <div>
+                        <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest ml-1 mb-1 block">Display Name</label>
+                        <div className="relative">
+                          <Users className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" size={16} />
+                          <input 
+                            type="text" 
+                            placeholder="Kamal FPS" 
+                            value={displayName}
+                            onChange={e => setDisplayName(e.target.value)}
+                            className="w-full bg-black/40 border border-white/10 rounded-xl py-3 pl-10 pr-4 focus:border-[#00FFFF] outline-none text-white text-sm"
+                            required
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                  
+                  <div>
+                    <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest ml-1 mb-1 block">Email Address</label>
+                    <div className="relative">
+                      <Globe className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" size={16} />
+                      <input 
+                        type="email" 
+                        placeholder="hello@example.com" 
+                        value={email}
+                        onChange={e => setEmail(e.target.value)}
+                        className="w-full bg-black/40 border border-white/10 rounded-xl py-3 pl-10 pr-4 focus:border-[#00FFFF] outline-none text-white text-sm"
+                        required
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest ml-1 mb-1 block">Password</label>
+                    <div className="relative">
+                      <Settings className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" size={16} />
+                      <input 
+                        type="password" 
+                        placeholder="••••••••" 
+                        value={password}
+                        onChange={e => setPassword(e.target.value)}
+                        className="w-full bg-black/40 border border-white/10 rounded-xl py-3 pl-10 pr-4 focus:border-[#00FFFF] outline-none text-white text-sm"
+                        required
+                      />
+                    </div>
+                  </div>
+                  
+                  <button className="w-full bg-gradient-to-r from-[#7C3AED] to-[#00FFFF] text-black py-4 rounded-xl font-bold hover:opacity-90 transition-all shadow-[0_0_20px_rgba(0,255,255,0.2)] active:scale-95 mt-2">
+                    {isRegistering ? 'Create Account' : 'Sign In'}
+                  </button>
+                  <div className="text-center mt-4">
+                    <button type="button" onClick={() => setAuthMode('options')} className="text-zinc-500 text-sm hover:text-white transition-colors">← Back to options</button>
+                  </div>
+                </form>
+              </motion.div>
             )}
 
             {authMode === 'phone' && (
               <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="space-y-4 text-left">
                 {!confirmationResult ? (
                   <>
-                    <label className="text-[10px] font-bold text-neutral-500 uppercase tracking-widest ml-1">Phone Number</label>
+                    <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest ml-1 block mb-1">Phone Number</label>
                     <input 
                       type="tel" 
                       placeholder="+91 98765 43210" 
                       value={phoneNumber}
                       onChange={e => setPhoneNumber(e.target.value)}
-                      className="w-full bg-neutral-950 border border-white/5 rounded-xl py-4 px-4 focus:border-orange-500 outline-none text-xl font-bold text-center tracking-wider"
+                      className="w-full bg-black/40 border border-white/10 rounded-xl py-4 px-4 focus:border-[#00FFFF] outline-none text-xl font-bold text-center tracking-wider text-white"
                     />
-                    <button onClick={handleSendCode} className="w-full bg-orange-600 text-white py-4 rounded-xl font-bold hover:bg-orange-500 transition-all">
+                    <button onClick={handleSendCode} className="w-full bg-gradient-to-r from-[#7C3AED] to-[#00FFFF] text-black py-4 rounded-xl font-bold hover:opacity-90 shadow-[0_0_20px_rgba(0,255,255,0.2)] transition-all">
                       Send OTP
                     </button>
                   </>
                 ) : (
                   <>
-                    <label className="text-[10px] font-bold text-neutral-500 uppercase tracking-widest ml-1">Enter Verification Code</label>
+                    <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest ml-1 block mb-1">Enter Verification Code</label>
                     <input 
                       type="text" 
                       placeholder="XXXXXX" 
                       value={verificationCode}
                       onChange={e => setVerificationCode(e.target.value)}
-                      className="w-full bg-neutral-950 border border-white/5 rounded-xl py-4 px-4 focus:border-orange-500 outline-none text-2xl font-black text-center tracking-[1rem]"
+                      className="w-full bg-black/40 border border-white/10 rounded-xl py-4 px-4 focus:border-[#00FFFF] outline-none text-2xl font-black text-center tracking-[1rem] text-white"
                     />
-                    <button onClick={handleVerifyCode} className="w-full bg-green-600 text-white py-4 rounded-xl font-bold hover:bg-green-500 transition-all">
+                    <button onClick={handleVerifyCode} className="w-full bg-[#00FFFF] text-black py-4 rounded-xl font-bold hover:brightness-90 shadow-[0_0_20px_rgba(0,255,255,0.2)] transition-all">
                       Verify & Login
                     </button>
                   </>
                 )}
-                <button onClick={() => { setAuthMode('options'); setConfirmationResult(null); }} className="w-full text-neutral-500 text-sm hover:text-white mt-2">Go Back</button>
+                <div className="text-center">
+                  <button onClick={() => { setAuthMode('options'); setConfirmationResult(null); }} className="text-zinc-500 text-sm hover:text-white mt-2 transition-colors">← Back to options</button>
+                </div>
               </motion.div>
             )}
           </AnimatePresence>
@@ -402,39 +456,40 @@ export default function Dashboard() {
     return (
       <main className="pt-32 px-4 max-w-2xl mx-auto">
         <div className="mb-10 text-center">
-          <h1 className="text-4xl font-bold tracking-tight mb-2">Claim your handle</h1>
-          <p className="text-neutral-500">Kickstart your zero-commission journey.</p>
+          <h1 className="text-4xl font-black text-chrome tracking-tight mb-2">Claim your handle</h1>
+          <p className="text-zinc-400 font-medium">Kickstart your zero-commission journey.</p>
         </div>
-        <form onSubmit={handleSetup} className="space-y-8 bg-neutral-900/50 p-10 rounded-[2.5rem] border border-white/10 backdrop-blur-xl">
+        <form onSubmit={handleSetup} className="space-y-8 bg-black/40 p-10 rounded-[2.5rem] border border-white/10 backdrop-blur-[20px] shadow-[0_0_50px_rgba(0,0,0,0.5)] relative overflow-hidden">
+          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[#7C3AED] to-[#00FFFF]" />
           <div className="space-y-6">
             <div className="space-y-2">
-              <label className="text-xs font-bold uppercase tracking-widest text-neutral-500">Pick a username</label>
+              <label className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 ml-1">Pick a username</label>
               <div className="relative">
-                <span className="absolute left-4 top-1/2 -translate-y-1/2 font-bold text-neutral-600 text-sm">boost.live/t/</span>
+                <span className="absolute left-4 top-1/2 -translate-y-1/2 font-bold text-zinc-600 text-sm">boost.live/t/</span>
                 <input 
                   required
                   placeholder="kamalfps"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
-                  className="w-full bg-neutral-950 border border-white/5 rounded-2xl py-4 pl-[8.5rem] pr-4 focus:border-orange-500 outline-none transition-colors font-bold"
+                  className="w-full bg-black/40 border border-white/10 rounded-2xl py-4 pl-[8.5rem] pr-4 focus:border-[#00FFFF] outline-none transition-colors font-bold text-white shadow-inner"
                 />
               </div>
             </div>
             <div className="space-y-2">
-              <label className="text-xs font-bold uppercase tracking-widest text-neutral-500">Display Name</label>
+              <label className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 ml-1">Display Name</label>
               <input 
                 required
                 placeholder="Kamal FPS"
                 value={displayName}
                 onChange={(e) => setDisplayName(e.target.value)}
-                className="w-full bg-neutral-950 border border-white/5 rounded-2xl py-4 px-4 focus:border-orange-500 outline-none transition-colors font-bold"
+                className="w-full bg-black/40 border border-white/10 rounded-2xl py-4 px-4 focus:border-[#00FFFF] outline-none transition-colors font-bold text-white shadow-inner"
               />
             </div>
           </div>
-          <button className="w-full bg-orange-600 text-white py-5 rounded-[1.5rem] font-bold text-lg hover:bg-orange-500 transition-all shadow-[0_0_30px_rgba(234,88,12,0.3)] active:scale-95">
+          <button className="w-full bg-gradient-to-r from-[#7C3AED] to-[#00FFFF] text-black py-5 rounded-[1.5rem] font-black text-lg uppercase tracking-widest hover:opacity-90 transition-all shadow-[0_0_30px_rgba(0,255,255,0.2)] active:scale-95">
             Create Profile
           </button>
-          <button type="button" onClick={() => { localStorage.removeItem('nativeToken'); signOut(auth); setUser(null); }} className="w-full text-neutral-500 hover:text-white text-sm">Sign Out</button>
+          <button type="button" onClick={() => { localStorage.removeItem('nativeToken'); signOut(auth); setUser(null); }} className="w-full text-zinc-500 hover:text-white text-sm transition-colors">Sign Out</button>
         </form>
       </main>
     );
@@ -508,7 +563,7 @@ export default function Dashboard() {
         )}
       </div>
 
-      {(['admin', 'plans', 'platform'].includes(activeTab)) && streamer.role !== 'admin' && (
+      {(['admin', 'platform'].includes(activeTab)) && streamer.role !== 'admin' && (
          <div className="py-40 text-center space-y-6">
             <div className="w-20 h-20 bg-red-500/10 rounded-full flex items-center justify-center mx-auto text-red-500">
                <ShieldCheck size={40} />
@@ -517,6 +572,133 @@ export default function Dashboard() {
             <p className="text-neutral-500 max-w-sm mx-auto">This module is reserved for Platform Administrators. Please contact the site owner for permissions.</p>
             <button onClick={() => setActiveTab('overview')} className="px-8 py-3 bg-white text-black rounded-xl font-bold">Back to Overview</button>
          </div>
+      )}
+
+      {activeTab === 'plans' && streamer.role !== 'admin' && (
+        <motion.div key="user-plans" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="space-y-8">
+           <div className="flex items-center justify-between">
+              <h2 className="text-2xl font-bold tracking-tight text-white">Your Subscription</h2>
+           </div>
+
+           {/* Current Subscription Details */}
+           <div className="glass-panel p-8 rounded-[2rem] border border-white/10 relative overflow-hidden bg-white/[0.02]">
+             <div className="absolute top-0 right-0 p-12 opacity-[0.03]">
+                <Zap size={160} />
+             </div>
+             
+             <div className="relative z-10">
+               <h3 className="text-xl font-bold text-neutral-400 mb-1">Current Plan</h3>
+               <div className="flex items-center gap-4 mb-6">
+                 <h4 className="text-4xl font-black text-white uppercase tracking-tight">
+                   {availablePlans.find(p => p.id === streamer.planId)?.name || 'Rookie (Default)'}
+                 </h4>
+                 {streamer.isTrial && streamer.trialEndsAt && (
+                   <span className="px-3 py-1 bg-purple-500/20 text-purple-400 rounded-full text-xs font-bold border border-purple-500/30 uppercase tracking-wider">
+                     Active Trial
+                   </span>
+                 )}
+               </div>
+
+               {streamer.isTrial && streamer.trialEndsAt && (
+                 <div className="mb-6 p-4 rounded-xl bg-purple-500/10 border border-purple-500/20 max-w-xl flex items-start gap-4">
+                   <Zap className="text-purple-400 mt-1" size={20} />
+                   <div>
+                     <p className="text-sm font-bold text-white mb-1">Your Legend Trial is Active</p>
+                     <p className="text-xs text-purple-300">
+                       You have {Math.max(0, Math.ceil((new Date(streamer.trialEndsAt).getTime() - Date.now()) / (1000 * 60 * 60 * 24)))} days remaining in your trial. 
+                       After this period, your plan will downgrade to Rookie unless you upgrade your infrastructure.
+                     </p>
+                   </div>
+                 </div>
+               )}
+
+               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-8">
+                 <div className="space-y-2">
+                   <p className="text-xs text-neutral-500 uppercase tracking-widest font-bold">Max Widgets</p>
+                   <p className="text-lg font-mono text-white">
+                     {widgets.length} / {availablePlans.find(p => p.id === streamer.planId)?.features.maxWidgets || 2} Used
+                   </p>
+                 </div>
+                 <div className="space-y-2">
+                   <p className="text-xs text-neutral-500 uppercase tracking-widest font-bold">TTS Voices Unlocked</p>
+                   <p className="text-lg font-mono text-white">
+                     {availablePlans.find(p => p.id === streamer.planId)?.features.ttsVoices.length || 2} Voices
+                   </p>
+                 </div>
+                 <div className="space-y-2">
+                   <p className="text-xs text-neutral-500 uppercase tracking-widest font-bold">Status</p>
+                   <p className="text-lg font-mono text-green-400 flex items-center gap-2">
+                     <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" /> Active
+                   </p>
+                 </div>
+               </div>
+             </div>
+           </div>
+
+           <div className="mt-16 mb-8">
+              <h2 className="text-2xl font-bold tracking-tight text-white mb-2">Upgrade Your Infrastructure</h2>
+              <p className="text-neutral-500 text-sm max-w-xl">Supercharge your stream with premium AI TTS voices, advanced animated overlays, and priority routing.</p>
+           </div>
+           
+           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+              {availablePlans.map((plan, idx) => (
+                <div key={plan.id} className={cn("glass-panel p-8 rounded-[2rem] flex flex-col relative overflow-hidden transition-all duration-500", plan.price > 500 ? "border border-[#7C3AED]/50 shadow-[0_0_30px_rgba(124,58,237,0.1)] scale-105 z-10" : "border border-white/5 bg-[#0D0D14]/50")}>
+                   {plan.price > 500 && (
+                     <div className="absolute inset-0 bg-gradient-to-b from-[#7C3AED]/20 via-transparent to-transparent pointer-events-none" />
+                   )}
+                   <div className="relative z-10 flex flex-col h-full">
+                     <h3 className="text-2xl font-black text-chrome uppercase tracking-tighter mb-2">{plan.name}</h3>
+                     <div className="flex items-baseline gap-1 mb-8">
+                       <span className="text-4xl font-bold text-white">{plan.currency === 'INR' ? '₹' : plan.currency}{plan.price}</span>
+                       <span className="text-zinc-500 font-medium">/mo</span>
+                     </div>
+                     
+                     <div className="h-px border-b border-dashed border-white/10 w-full mb-8" />
+                     
+                     <ul className="flex flex-col gap-4 mb-10 flex-grow">
+                        <li className="flex items-start gap-3">
+                           <div className={cn("mt-0.5 w-5 h-5 rounded-full flex items-center justify-center shrink-0", plan.price > 500 ? "bg-[#7C3AED]/20 text-[#00FFFF]" : "bg-white/5 text-zinc-400")}>
+                             <Zap size={12} strokeWidth={3} />
+                           </div>
+                           <span className="text-zinc-300 text-sm font-medium">Allows {plan.features.maxWidgets} active widgets</span>
+                        </li>
+                        <li className="flex items-start gap-3">
+                           <div className={cn("mt-0.5 w-5 h-5 rounded-full flex items-center justify-center shrink-0", plan.price > 500 ? "bg-[#7C3AED]/20 text-[#00FFFF]" : "bg-white/5 text-zinc-400")}>
+                             <Volume2 size={12} strokeWidth={3} />
+                           </div>
+                           <span className="text-zinc-300 text-sm font-medium">{plan.features.ttsVoices.length > 3 ? "Premium + Standard TTS" : "Standard TTS"}</span>
+                        </li>
+                        {plan.features.customThemes && (
+                           <li className="flex items-start gap-3">
+                             <div className="mt-0.5 w-5 h-5 rounded-full flex items-center justify-center shrink-0 bg-[#7C3AED]/20 text-[#00FFFF]">
+                               <Palette size={12} strokeWidth={3} />
+                             </div>
+                             <span className="text-white text-sm font-bold">Liquid/Gradient Theme Engine</span>
+                           </li>
+                        )}
+                     </ul>
+                     
+                     <button 
+                       onClick={() => {
+                          if (streamer.planId === plan.id) return;
+                          toast.promise(
+                             new Promise(resolve => setTimeout(resolve, 2000)),
+                             {
+                               loading: 'Processing Payment via Razorpay...',
+                               success: `Successfully upgraded to ${plan.name} Tier! (Simulated backend update)`,
+                               error: 'Payment failed'
+                             }
+                          )
+                       }}
+                       className={cn("w-full py-4 mt-auto rounded-xl font-bold uppercase tracking-widest text-sm transition-all focus:outline-none", plan.price > 500 ? "bg-gradient-to-r from-[#7C3AED] to-[#00FFFF] text-black hover:opacity-90 shadow-[0_0_20px_rgba(124,58,237,0.3)]" : "bg-white/5 text-white hover:bg-white/10 border border-white/10")}
+                     >
+                       {streamer.planId === plan.id ? 'Current Plan' : 'Subscribe Now'}
+                     </button>
+                    </div>
+                </div>
+              ))}
+           </div>
+        </motion.div>
       )}
 
       <AnimatePresence mode="wait">
@@ -599,14 +781,17 @@ export default function Dashboard() {
              <div className="flex items-center justify-between">
                 <h2 className="text-2xl font-bold tracking-tight">Active Overlays</h2>
                 <div className="flex gap-2">
-                   <button onClick={() => handleAddWidget('alert')} className="px-4 py-2 bg-orange-600 text-white rounded-xl text-xs font-bold hover:bg-orange-500 transition-all flex items-center gap-2 shadow-lg shadow-orange-600/20">
+                   <button onClick={() => handleAddWidget('alert')} className="px-4 py-2 bg-gradient-to-r from-[#7C3AED] to-[#00FFFF] text-black rounded-xl text-xs font-bold hover:brightness-110 transition-all flex items-center gap-2 shadow-[0_0_15px_rgba(0,255,255,0.2)]">
                       <Plus size={14} /> Alert Box
                    </button>
                    <button onClick={() => handleAddWidget('goal')} className="px-4 py-2 bg-white/5 rounded-xl text-xs font-bold hover:bg-white/10 transition-all flex items-center gap-2 border border-white/10">
-                      <Plus size={14} /> Donation Goal
+                      <Plus size={14} /> Goal
                    </button>
                    <button onClick={() => handleAddWidget('ticker')} className="px-4 py-2 bg-white/5 rounded-xl text-xs font-bold hover:bg-white/10 transition-all flex items-center gap-2 border border-white/10">
-                      <Plus size={14} /> Top 5 Tippers
+                      <Plus size={14} /> Recent Tippers
+                   </button>
+                   <button onClick={() => handleAddWidget('toptipper')} className="px-4 py-2 bg-white/5 rounded-xl text-xs font-bold hover:bg-white/10 transition-all flex items-center gap-2 border border-white/10">
+                      <Plus size={14} /> Top Tipper (Lifetime)
                    </button>
                 </div>
              </div>
@@ -632,7 +817,13 @@ export default function Dashboard() {
                             </Link>
                          </div>
                        </div>
-                       <WidgetCustomizer widget={w} onUpdate={fetchDashboardData} onDelete={fetchDashboardData} />
+                       <WidgetCustomizer 
+                         widget={w} 
+                         onUpdate={fetchDashboardData} 
+                         onDelete={fetchDashboardData}
+                         allPlatformVoices={systemSettings?.availableTTSVoices || []}
+                         allowedTTSVoices={availablePlans.find(p => p.id === streamer.planId)?.features.ttsVoices || []}
+                       />
                     </div>
                   ))}
 

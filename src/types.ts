@@ -73,13 +73,13 @@ export interface Donation {
 
 export interface WidgetConfig {
   minAmount: number;
-  ttsEnabled: boolean;
+  ttsEnabled?: boolean;
   ttsVoice?: string;
   primaryColor: string;
   progressColor?: string; // Color for the progress bar specifically
   boxGradient?: string; // e.g. "linear-gradient(to right, #000, #111)"
   progressGradient?: string; // e.g. "linear-gradient(to right, #f97316, #f59e0b)"
-  animationType: string;
+  animationType?: string;
   goalAmount?: number;
   goalTitle?: string;
   currentProgress?: number;
@@ -87,12 +87,15 @@ export interface WidgetConfig {
   goalStartDate?: any; // Firestore Timestamp equivalent
   tickerSpeed?: 'slow' | 'normal' | 'fast';
   tickerCount?: number;
-  tickerInterval?: number; // duration in seconds
   showText?: boolean;
+  stickyText?: string; // For Recent 5 Ticker command
   backgroundColor?: string;
   backgroundOpacity?: number;
   isPaused?: boolean;
-  alertPadding?: number; // e.g. 16
+  padding?: number; // Custom Padding (0-50px)
+  width?: number; // Lenght / Box width
+  height?: number; // Breadth / Box height
+  progressBarHeight?: number; // Size adjustment for progress bar limit
   alertFontSize?: number; // e.g. 16
   alertFontFamily?: string;
   alertBorderRadius?: number;
@@ -101,6 +104,6 @@ export interface WidgetConfig {
 export interface Widget {
   id: string;
   streamerId: string;
-  type: 'alert' | 'goal' | 'ticker';
+  type: 'alert' | 'goal' | 'ticker' | 'toptipper';
   config: WidgetConfig;
 }
